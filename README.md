@@ -4,19 +4,101 @@ RU: Помощник для компиляции SourceMod плагинов.
 
 EN: Helper for compiling Sourcemod plugins
 
-1. Параметры коммандой строки запуска
-SMcompiler <path\file.sp>, где <path\file.sp> - имя файла с исходным кодом. 
+0.Перед запуском должена существовать папка SourceMod 
+```sh
 
-2.Файловой структуры проекта плагина
-1. Только один файл.Т.е. в проекте используется только один файл в формате *.sp.
+D:\USERS\<UserName>\PROJECT\SOURCEMOD-1.10.0-GIT6502-WINDOWS
+├───addons
+│   ├───metamod
+│   └───sourcemod
+│       ├───bin
+│       ├───configs
+│       │   ├───geoip
+│       │   └───sql-init-scripts
+│       │       ├───mysql
+│       │       └───sqlite
+│       ├───data
+│       ├───extensions
+│       ├───gamedata
+│       │   ├───core.games
+│       │   ├───sdkhooks.games
+│       │   ├───sdktools.games
+│       │   └───sm-cstrike.games
+│       ├───logs
+│       ├───plugins
+│       │   └───disabled
+│       ├───scripting
+│       │   ├───admin-flatfile
+│       │   ├───adminmenu
+│       │   ├───basebans
+│       │   ├───basecomm
+│       │   ├───basecommands
+│       │   ├───basevotes
+│       │   ├───funcommands
+│       │   ├───funvotes
+│       │   ├───include
+│       │   ├───playercommands
+│       │   └───testsuite
+│       └───translations
+│           ├───ar
+│           :
+│           └───zho
+└───cfg
+    └───sourcemod
+```
+
+1. Параметры коммандой строки 
+SMcompiler <path\plugin.sp>, где <path\plugin.sp> - имя файла с исходным кодом. 
+
+2.Файловые структуры проекта плагина
+1. Только один файл.Т.е. в папке проекта используется только один файл в формате *.sp
 2. Файловая структура проекта плагина имеет следующий формат:
 ```sh
 
-<git folder> 
- ├── game<plugin_folder>       # `` например: dod,css,csgo
-    ├── addons
-       ├── sourcemod
- └── mycmp.ini                 # `параметры компилятора`
+<git project folder> 
+ ├── GAMEMOD
+ │   ├── ADDONS  
+ │   │   ├── SOURCEMOD
+ │   │       ├── [TRANSLATIONS]
+ │   │       │     ├── [plugin.phrases.txt]
+ │   │       │     ├── [RU]
+ │   │       │     │    └── [plugin.phrases.txt]
+ │   │       │     :
+ │   │       └── SCRIPTING
+ │   │             ├── [INCLUDE]
+ │   │             │    ├───── [file1.inc]
+ │   │             │    ├───── [file2.inc]
+ │   │             │    :
+ │   │             └─ plugin.sp #` исходный файл 
+ │   ├── [CFG] 
+ │   │    └── [SOURCEMOD] 
+ │   │         └── [plugin.cfg]
+ │   ├── [DOWNLOAD] 
+ │   │    ├── [MAPS]
+ │   │    ├── [MODELS]
+ │   │    ├── [MATERIALS]
+ │   │    ├── [RESOURCE]
+ │   │    │   ├── [OVERVIEWS]
+ │   │    │   : 
+ │   │    ├── [SOUND]
+ │   │    ├── [USER_CUSTOM]
+ │   ├── [CUSTOM] 
+ │        ├── [PLUGIN]
+ │             ├── [MODELS]
+ │             │    ├───── [plugin_model1.mdl]
+ │             │    ├───── [plugin_model2.mdl]
+ │             │    :
+ │             ├── [MATERIALS]
+ │             │    ├───── [plugin_material1.vmt]
+ │             │    ├───── [plugin_material2.vmt]
+ │             │    :
+ │             ├── [VGUI]
+ │             │    ├───── [plugin_ui_thing.res]
+ │             └── [plugin.vpk] 	
+ └── smcmphlp.ini                # `параметры компилятора`
+ 
+ 
+ 
 ```
 
 3. Конфигурация работы помощника
