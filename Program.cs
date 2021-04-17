@@ -41,7 +41,7 @@ namespace SourceModPawnCompilerPluginHelper
 		static string SRCDS_Folder;
 		static string SMXFolder = "game\\addons\\sourcemod\\plugins\\";
 		static bool MapReload = false;
-		const ConsoleColor BGcolor = ConsoleColor.Black;
+		const ConsoleColor BGcolor = ConsoleColor.Blue;
 		const ConsoleColor FGcolor = ConsoleColor.White;
 		public static void Console_ResetColor() {Console.BackgroundColor = BGcolor;Console.ForegroundColor = FGcolor;}
 		/*public struct Plugin_folder 
@@ -56,9 +56,10 @@ namespace SourceModPawnCompilerPluginHelper
 			//plugfolder[0].SMXFolder="";
 			string title = "Sourcemod Compiler Helper ver " + (FileVersionInfo.GetVersionInfo((Assembly.GetExecutingAssembly()).Location)).ProductVersion + ": ";
 			Console.Title = title;
-			Console.BackgroundColor = ConsoleColor.Black;			
-			Console.ForegroundColor = ConsoleColor.Cyan;
+			Console_ResetColor();
 			Console.Clear();
+			Console.BackgroundColor = ConsoleColor.Blue;			
+			Console.ForegroundColor = ConsoleColor.Cyan;			
 			Console.WriteLine(title);
 			Console.WriteLine("-------------------------------------------------");
 			Console_ResetColor();
@@ -115,7 +116,6 @@ namespace SourceModPawnCompilerPluginHelper
 			INIFile = INIFolder + INIFile;
 			if (!File.Exists(INIFile))
 			{
-
 				Console.ForegroundColor = ConsoleColor.Red;
 				Console.WriteLine("ERR:INI File \t" + INIFile + " not found");
 				Console_ResetColor();
@@ -404,7 +404,7 @@ namespace SourceModPawnCompilerPluginHelper
 			Compilator_Folder = inifile.ReadString("Compiler", "Compilator_Folder", mySMcomp_Folder/*"smk64t\\sourcemod-1.7.3-git5301"*/);
 			CheckFolderString(ref Compilator_Folder, ParentFolder(PluginFolder));
 
-			//Если Compilator_Folder не содержит в начале строки ?:\ или \ или \\, то дополнить путь PluginFolder	Compilator_Folder=INIFolder+Compilator_Folder;
+			//Если Compilator_Folder не содержит в начале строки с:\ или \ или \\, то дополнить путь PluginFolder	Compilator_Folder=INIFolder+Compilator_Folder;
 			Console.WriteLine("Compilator_Folder={0}", Compilator_Folder);
 
 			Plugin_Author = inifile.ReadString("Compiler", "Plugin_Author", "");
@@ -449,20 +449,6 @@ namespace SourceModPawnCompilerPluginHelper
 			Debug.Print("rcon_port=" + rcon_Port);
 			Debug.Print("rcon_password=" + rcon_password);
 #endif
-
-			//[Compiler]
-			//Compilator="spcomp.exe"
-			//Compilator_Folder="c:\pro\SourceMod\"
-			//Parameters=
-			//Include=
-			//
-			//[Server]
-			//rcon_address="deploy2"
-			//rcon_port=27015
-			//rcon_password="PI"
-			//SRCDS_Folder="\\deploy2\c$\Program Files\srcds.css.75\css\cstrike\" 
-			//SRCDS_FTP=
-
 		}
 		//*******************************************
 		public static void CheckFolderString(ref string s)

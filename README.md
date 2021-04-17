@@ -1,13 +1,18 @@
 # Source Mod Pawn Compiler Plugin Helper
 ---
+SMcompiler.exe
+
 RU: Помощник для компиляции SourceMod плагинов. 
 
 EN: Helper for compiling Sourcemod plugins
 
-0.Перед запуском должена существовать папка SourceMod 
+0.Перед запуском SMcompiler.exe должена существовать папка SourceMod со всей файловой структурой.
+Оптимально размещать файл SMcompiler.exe и smcmphlp.ini в папке ...\SOURCEMOD\addons\sourcemod\scripting
+В дальнейшем описании для примера будем использовать папку D:\USERS\<UserName>\PROJECT внутри которой будут папки с проектами.
+
 ```sh
 
-D:\USERS\<UserName>\PROJECT\SOURCEMOD-1.10.0-GIT6502-WINDOWS
+D:\USERS\<UserName>\PROJECT\SOURCEMOD
 ├───addons
 │   ├───metamod
 │   └───sourcemod
@@ -47,15 +52,16 @@ D:\USERS\<UserName>\PROJECT\SOURCEMOD-1.10.0-GIT6502-WINDOWS
     └───sourcemod
 ```
 
-1. Параметры коммандой строки 
-SMcompiler <path\plugin.sp>, где <path\plugin.sp> - имя файла с исходным кодом. 
 
-2.Файловые структуры проекта плагина
-1. Только один файл.Т.е. в папке проекта используется только один файл в формате *.sp
+1. Параметры коммандой строки SMcompiler.exe
+SMcompiler.exe <path\plugin.sp>, где <path\plugin.sp> - имя файла с исходным кодом. 
+
+2.Файловая структура проекта плагина или только один файл
+1. Только один файл.т.е. в папке проекта используется только один файл в формате *.sp
 2. Файловая структура проекта плагина имеет следующий формат:
 ```sh
 
-<git project folder> 
+D:\USERS\<UserName>\PROJECT\PLUGIN
  ├── GAMEMOD
  │   ├── ADDONS  
  │   │   ├── SOURCEMOD
@@ -101,31 +107,67 @@ SMcompiler <path\plugin.sp>, где <path\plugin.sp> - имя файла с ис
  
 ```
 
-3. Конфигурация работы помощника
-Файл mycmp.ini 
-1. В папке с MySMcompiler.
-2. В корневой папке проекта плагина.
+3. Конфигурация работы помощника SMcompiler.exe
+Файл smcmphlp.ini 
+
+SMcompiler.exe сначала читает файл smcmphlp.ini из той же папки что и он сам, затем из корневой папки проекта плагин. 
+Если в разных файлах smcmphlp.ini встречается один и тот же параметр с разными значениями, то параметр перезаписыватся из последнего прочитанного файла.
+
 ```sh
+
+Описания параметров в файле smcmphlp.ini
+
+Пути к файлам и папкам можно указывать как асболютный так и относительный.
+Точкой отсчета относительного пути к файлу или папке явлется папка текущего проекта.
+Пример указания асболютного пути: 
+D:\USERS\<UserName>\PROJECT\SOURCEMOD\addons\sourcemod\scripting 
+Пример указания относительного пути: 
+..\SOURCEMOD\addons\sourcemod\scripting 
+
 [Compiler]
+;Файл компилятора плагинов для SourceMod. 
 Compilator="spcomp.exe" 
-Compilator_Folder="..\smk64t\sourcemod-1.7.3-git5301\"
-Plugin_Author="Plugin_Author"
-;Parameters=
+;Параметры, передаваемы в коммандную строку компилятора плагина
+Parameters=
+
+;TODO:make descriptipn
 Include=..\smk64t\scripting\include;..\smk64t\sourcemod-1.7.3-git5301\include;..\smk64t\smlib\scripting\include;
-;Always included:
-;sourcemod\include 
+
+;Default included:
+;sourcemod\scripting\include 
+
+;TODO:make descriptipn
 ;smK64t\scripting\include
 ;smlib\scripting\include
 
+
+;Папка где расположен файл компилятора. В данном случае это папка D:\USERS\<UserName>\PROJECT\SOURCEMOD\addons\sourcemod\scripting 
+;Можно указывать абсолютный путь. D:\USERS\<UserName>\PROJECT\SOURCEMOD\addons\sourcemod\scripting 
+;Можно указывать путь относительно папки текущего проекта. ..\SOURCEMOD\addons\sourcemod\scripting 
+Compilator_Folder=..\SOURCEMOD\addons\sourcemod\scripting
+;Указать автора плагина
+Plugin_Author="Plugin_Author"
+
+; Параметры для отладки плагина на сервере
 [Server]
 rcon_address=ip-address
 rcon_port=port
 rcon_password="password"
-SRCDS_Folder=path to folder in LAN
-SRCDS_FTP=path to game folder over ftp server
+; Путь куда копировать скомпилированный плагин по протоколу SMB. Путь в формати URI. Это может быть локальный диск или  удаленный сервер
+;path to folder in LAN or
+SRCDS_Folder=\\server1\c$\srcds\game\addons\sourcemod\plugin
+; Путь куда копировать скомпилированный плагин по протоколу FTP. Путь в формати URL.
+SRCDS_FTP=ftp://server/game/addons/sourcemod/plugin
+;Перезапусить srcds перед отладкой новой скомпилированной версии плугина
+RestartServer=False
+;Перезапусить карту на srcds  перед отладкой новой скомпилированной версии плугина
+RestartMap=No
+
+
+
 ```
 
-
+---
 
 ##Changelog 
 * Unreleased 
