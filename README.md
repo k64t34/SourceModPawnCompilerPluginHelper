@@ -51,6 +51,14 @@ D:\USERS\<UserName>\PROJECT\SOURCEMOD
 └───cfg
     └───sourcemod
 ```
+При использовании библиотеки smK64t  также необходимо клонировать https://github.com/k64t34/smK64t.sourcemod с подмодулем smLib https://github.com/bcserv/smlib
+
+В итоге должно быть три папки
+
+D:\USERS\<UserName>\PROJECT
+                      ├─ SOURCEMOD
+                      ├─ SMK64T.SOURCEMOD 
+                      └─ PLUGIN
 
 
 1. Параметры коммандой строки SMcompiler.exe

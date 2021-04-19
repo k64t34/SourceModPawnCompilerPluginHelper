@@ -41,7 +41,7 @@ namespace SourceModPawnCompilerPluginHelper
 		static string SRCDS_Folder;
 		static string SMXFolder = "game\\addons\\sourcemod\\plugins\\";
 		static bool MapReload = false;
-		const ConsoleColor BGcolor = ConsoleColor.Blue;
+		const ConsoleColor BGcolor = ConsoleColor.DarkBlue;
 		const ConsoleColor FGcolor = ConsoleColor.White;
 		public static void Console_ResetColor() {Console.BackgroundColor = BGcolor;Console.ForegroundColor = FGcolor;}
 		/*public struct Plugin_folder 
@@ -58,7 +58,7 @@ namespace SourceModPawnCompilerPluginHelper
 			Console.Title = title;
 			Console_ResetColor();
 			Console.Clear();
-			Console.BackgroundColor = ConsoleColor.Blue;			
+			//Console.BackgroundColor = ConsoleColor.Blue;			
 			Console.ForegroundColor = ConsoleColor.Cyan;			
 			Console.WriteLine(title);
 			Console.WriteLine("-------------------------------------------------");
@@ -103,11 +103,14 @@ namespace SourceModPawnCompilerPluginHelper
 			//Поиск INI вверх по 3-ум способам:
 			// 1 просто прыгнуть вверх на пару папок
 			// 2 искать папку содежащую .git или addon			
-			INIFolder = System.IO.Directory.GetParent(SourceFolder).ToString();
-			INIFolder = System.IO.Directory.GetParent(INIFolder).ToString();
-			INIFolder = System.IO.Directory.GetParent(INIFolder).ToString();
-			INIFolder = System.IO.Directory.GetParent(INIFolder).ToString();
-			INIFolder = System.IO.Directory.GetParent(INIFolder).ToString();
+			INIFolder  =  System.IO.Directory.GetParent(SourceFolder).ToString();			
+			if (String.Compare(Path.GetDirectoryName(INIFolder), "SCRIPTING", true) == 0)
+			{
+				INIFolder = System.IO.Directory.GetParent(INIFolder).ToString();
+				INIFolder = System.IO.Directory.GetParent(INIFolder).ToString();
+				INIFolder = System.IO.Directory.GetParent(INIFolder).ToString();
+				INIFolder = System.IO.Directory.GetParent(INIFolder).ToString();
+			}
 			PluginFolder = INIFolder;
 			CheckFolderString(ref PluginFolder);
 			Console.WriteLine("Plugin Folder\t" + PluginFolder);
@@ -369,7 +372,8 @@ namespace SourceModPawnCompilerPluginHelper
 				Console_ResetColor();
 			}
 			RCon = null;
-			Thread.Sleep(1000);
+			//Thread.Sleep(10000);
+			
 			ScriptFinish(true);
 			System.Environment.Exit(0);
 
@@ -394,6 +398,9 @@ namespace SourceModPawnCompilerPluginHelper
 					if (Console.KeyAvailable) break;
 					Thread.Sleep(100);
 				}
+#if DEBUG
+				Console.ReadKey(true);
+#endif
 			}
 		}
 		//****************************************************			

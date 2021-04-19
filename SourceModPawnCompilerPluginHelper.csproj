@@ -58,4 +58,7 @@
     <Content Include="logo.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>$(ProjectDir)PostBuildEvent.cmd $(ConfigurationName) "$(TargetPath)" "D:\Users\Andrew\Project\sourcemod-1.10.0-git6502-windows\addons\sourcemod\scripting"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
