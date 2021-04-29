@@ -41,9 +41,13 @@ namespace SourceModPawnCompilerPluginHelper
 		static string SRCDS_Folder;
 		static string SMXFolder = "game\\addons\\sourcemod\\plugins\\";
 		static bool MapReload = false;
-		const ConsoleColor BGcolor = ConsoleColor.DarkBlue;
+		const ConsoleColor BGcolor = ConsoleColor.Black;
 		const ConsoleColor FGcolor = ConsoleColor.White;
+		const ConsoleColor FGcolorH1 = ConsoleColor.Yellow;
+		const ConsoleColor FGcolorFieldName = ConsoleColor.DarkGray;
+		const ConsoleColor FGcolorFieldValue = ConsoleColor.White;
 		public static void Console_ResetColor() {Console.BackgroundColor = BGcolor;Console.ForegroundColor = FGcolor;}
+		public static void Console_SetH1Color() { Console.BackgroundColor = BGcolor; Console.ForegroundColor = FGcolorH1; }
 		/*public struct Plugin_folder 
 		{
     		public string SMXFolder;
@@ -59,11 +63,12 @@ namespace SourceModPawnCompilerPluginHelper
 			Console_ResetColor();
 			Console.Clear();
 			//Console.BackgroundColor = ConsoleColor.Blue;			
-			Console.ForegroundColor = ConsoleColor.Cyan;			
-			Console.WriteLine(title);
-			Console.WriteLine("-------------------------------------------------");
+			//Console.ForegroundColor = ConsoleColor.DarkBlue;	
+			Console.ForegroundColor =FGcolorH1;
+			Console.Write(title);
+			Console.ForegroundColor =ConsoleColor.White ;
+			Console.Write(" "); Console.WriteLine(args[0]);			
 			Console_ResetColor();
-
 			mySMcomp_Folder = AppDomain.CurrentDomain.BaseDirectory;
 			// or			
 			//Application.ExecutablePath;
@@ -81,8 +86,7 @@ namespace SourceModPawnCompilerPluginHelper
 				System.Environment.Exit(0);
 			}
 			Console.Title = title + " " + args[0] + " " + DateTime.Now.ToString();
-			SourceFile = args[0];
-			Console.WriteLine("Argumets \t" + SourceFile);
+			SourceFile = args[0];			
 			//EXT1
 			if (!File.Exists(SourceFile))
 			{
@@ -97,8 +101,15 @@ namespace SourceModPawnCompilerPluginHelper
 			SourceFile = Path.GetFileNameWithoutExtension(SourceFile);
 			Console.Title = title + SourceFile + ".sp " + DateTime.Now.ToString();
 			//EXT4
-			Console.WriteLine("Source file \t" + SourceFile + ".sp");
-			Console.WriteLine("Source folder \t" + SourceFolder);
+			Console.ForegroundColor = FGcolorFieldName;
+			Console.Write("Source file \t" );
+			Console.BackgroundColor = ConsoleColor.Gray;
+			Console.ForegroundColor = ConsoleColor.Black;
+			Console.Write(SourceFolder);
+			Console.BackgroundColor = ConsoleColor.Yellow;
+			Console.ForegroundColor = ConsoleColor.Black;
+			Console.WriteLine(SourceFile + ".sp");
+			Console_ResetColor();
 			//EXT3
 			//Поиск INI вверх по 3-ум способам:
 			// 1 просто прыгнуть вверх на пару папок
@@ -113,7 +124,7 @@ namespace SourceModPawnCompilerPluginHelper
 			}
 			PluginFolder = INIFolder;
 			CheckFolderString(ref PluginFolder);
-			Console.WriteLine("Plugin Folder\t" + PluginFolder);
+			ConsoleWriteField("Plugin Folder", PluginFolder);			
 			CheckFolderString(ref INIFolder);
 			Debug.Print("INIFolder=" + INIFolder);
 			INIFile = INIFolder + INIFile;
@@ -125,23 +136,27 @@ namespace SourceModPawnCompilerPluginHelper
 				ScriptFinish(true);
 				System.Environment.Exit(2);
 			}
-			Console.WriteLine("INI File \t" + INIFile);
-
-			Console.ForegroundColor = ConsoleColor.White;
-			Console.WriteLine("\nRead config\n");
+			//Console.ForegroundColor = ConsoleColor.White;
+			Console_SetH1Color();
+			Console.Write("Read config file\t");
+			Console.ForegroundColor = FGcolorFieldValue;
+			Console.WriteLine(INIFile);
 			Console_ResetColor();
 
 			GetConfigFile(INIFile);
 			//Parsing include from INI file
 			string[] Compilator_Include_Folder = Compilator_Include_Folders.Split(';');
 			Compilator_Include_Folders = "";
-			Console.WriteLine("Include:");
+			ConsoleWriteField("Include","",false);
+			bool first = true;
 			foreach (string s in Compilator_Include_Folder)
 			{
 				if (!String.IsNullOrEmpty(s))
 				{
+					if (!first) Console.Write("\t\t");
 					Console.WriteLine(s);
 					Compilator_Include_Folders += " -i" + s.Trim();
+					first = false;
 				}
 			}
 			//
@@ -186,16 +201,15 @@ namespace SourceModPawnCompilerPluginHelper
 			else
 			{ System.IO.Directory.CreateDirectory(PluginFolder + SMXFolder); }
 			//Compiling
-			Console.ForegroundColor = ConsoleColor.White;
-			Console.WriteLine("\nRun compiling\n");
-			Console_ResetColor();
+			Console.ForegroundColor = FGcolorH1;
+			Console.Write("Run compiling "); Console.ForegroundColor = FGcolorFieldValue;
 			Process compiler = new Process();
 			compiler.StartInfo.RedirectStandardOutput = true;
 			compiler.StartInfo.RedirectStandardError = true;
 			compiler.StartInfo.CreateNoWindow = true;
 			compiler.StartInfo.WorkingDirectory = PluginFolder;
 			compiler.StartInfo.WorkingDirectory = SourceFolder;
-			Console.WriteLine("WorkingDirectory=\t{0}", compiler.StartInfo.WorkingDirectory);
+			
 			compiler.StartInfo.FileName = Compilator_Folder + Compilator;
 			Console.WriteLine(compiler.StartInfo.FileName);
 			compiler.StartInfo.UseShellExecute = false; //https://msdn.microsoft.com/ru-ru/library/system.diagnostics.processstartinfo.workingdirectory(v=vs.110).aspx			
@@ -217,16 +231,18 @@ namespace SourceModPawnCompilerPluginHelper
 			Console.WriteLine(buffArg);
 			compiler.StartInfo.Arguments += buffArg;
 
-			Console.WriteLine(" {0}", Compilator_Params);
-			compiler.StartInfo.Arguments += " " + Compilator_Params;
+			if (Compilator_Params.Length != 0)
+			{
+				Console.WriteLine(" {0}", Compilator_Params);
+				compiler.StartInfo.Arguments += " " + Compilator_Params;
+			}
 
 			Console.WriteLine(Compilator_Include_Folders);
 			compiler.StartInfo.Arguments += Compilator_Include_Folders;
-
-			Console.WriteLine(compiler.StartInfo.Arguments);
+			//Console.WriteLine(compiler.StartInfo.Arguments);
 			compiler.StartInfo.UseShellExecute = false;
-			compiler.StartInfo.RedirectStandardOutput = true;
-			Console.WriteLine();
+			compiler.StartInfo.RedirectStandardOutput = true;			
+			ConsoleWriteField("WorkingDirectory", compiler.StartInfo.WorkingDirectory);
 			try
 			{
 				compiler.Start();
@@ -239,8 +255,8 @@ namespace SourceModPawnCompilerPluginHelper
 			}
 			string output = compiler.StandardOutput.ReadToEnd();
 			string err = compiler.StandardError.ReadToEnd();
-			Console.WriteLine(output);
-			Console.WriteLine(err);
+			if (output.Length != 0) 			Console.WriteLine(output);
+			if (err.Length != 0) Console.WriteLine(err);
 			compiler.WaitForExit();
 			//Delete datetime.inc
 			if (!File.Exists(SourceFolder + "datetimecomp.inc")) File.Delete(SourceFolder + "datetimecomp.inc");
@@ -253,7 +269,7 @@ namespace SourceModPawnCompilerPluginHelper
 				else ERRORLEVEL_color = ConsoleColor.Green;
 			}
 			Console.ForegroundColor = ERRORLEVEL_color;
-			Console.WriteLine(compiler.ExitCode);
+			Console.WriteLine("ERRORLEVEL="+compiler.ExitCode);
 			Console_ResetColor();
 			if (File.Exists(SourceFolder + SourceFile + ".err"))
 			{
@@ -288,9 +304,19 @@ namespace SourceModPawnCompilerPluginHelper
 			//
 			// Copy to server
 			//
-			Console.ForegroundColor = ConsoleColor.White;
-			Console.WriteLine("\nCopy files from {1} to server {0}\n", SRCDS_Folder, PluginFolder + "game");
-			Console_ResetColor();
+			Console.ForegroundColor = FGcolorH1;
+			Console.Write("Copy output files ");
+			Console.ForegroundColor = FGcolorFieldValue;
+			Console.Write(SourceFile + ".smx");
+			Console.ForegroundColor = FGcolorH1;
+			Console.Write(" from folder ");
+			Console.ForegroundColor = FGcolorFieldValue;
+			Console.Write(SRCDS_Folder);
+			Console.ForegroundColor = FGcolorH1;
+			Console.Write(" to ");
+			Console.ForegroundColor = FGcolorFieldValue;
+			Console.WriteLine(PluginFolder + "game");
+			
 			if (!Directory.Exists(SRCDS_Folder))
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
@@ -412,7 +438,7 @@ namespace SourceModPawnCompilerPluginHelper
 			CheckFolderString(ref Compilator_Folder, ParentFolder(PluginFolder));
 
 			//Если Compilator_Folder не содержит в начале строки с:\ или \ или \\, то дополнить путь PluginFolder	Compilator_Folder=INIFolder+Compilator_Folder;
-			Console.WriteLine("Compilator_Folder={0}", Compilator_Folder);
+			ConsoleWriteField("Compilator_Folder", Compilator_Folder);
 
 			Plugin_Author = inifile.ReadString("Compiler", "Plugin_Author", "");
 			rcon_password = inifile.ReadString("Server", "rcon_password", "");
@@ -451,7 +477,7 @@ namespace SourceModPawnCompilerPluginHelper
 			Debug.Print("Compilator_Params\t=" + Compilator_Params);
 			Debug.Print("Compilator_Include_Folders=" + Compilator_Include_Folders);
 			Debug.Print("SRCDS_Folder=" + SRCDS_Folder);
-			Console.WriteLine("SRCDS_Folder\t{0}", SRCDS_Folder);
+			ConsoleWriteField("SRCDS_Folder", SRCDS_Folder);
 			Debug.Print("rcon_address=" + rcon_Address);
 			Debug.Print("rcon_port=" + rcon_Port);
 			Debug.Print("rcon_password=" + rcon_password);
@@ -528,5 +554,14 @@ namespace SourceModPawnCompilerPluginHelper
 			//Console.WriteLine("ParentFolder=\t{0}",Path.GetDirectoryName(Folder));		
 			return System.IO.Directory.GetParent(Folder.TrimEnd(new char[] { '\\' })).ToString() + "\\";
 		}
+		public static void ConsoleWriteField(string Name,string Value, bool CR=true) 
+		{
+			Console.ForegroundColor = FGcolorFieldName;
+			Console.Write(Name+"\t");
+			Console.ForegroundColor = FGcolorFieldValue;
+			Console.Write(Value + "\t");
+			if (CR) Console.WriteLine();
+		}
+		
 	}
 }
