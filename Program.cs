@@ -21,16 +21,16 @@ namespace SourceModPawnCompilerPluginHelper
 	class Program
 	{
 		//Global 
-		static string mySMcomp_Folder; //Gets the directory where the application is stored.	
-		static string SourceFile; //Source programm file .sp
-		static string SourceFolder;//Path to source programm file .sp
-		static string INIFile = "smcmphlp.ini"; //INI file
-		static string PluginFolder; //Base project folder with .git 
+		static string mySMcomp_Folder; //Gets the directory where the SMcompiler.exe  is stored.	
+		static string SourceFile; //Source plugin file .sp
+		static string SourceFolder;//Path to source plugin file .sp
+		static string INIFile = "smcmphlp.ini"; //INI file for source plugin
+		static string PluginFolder; //root plugin folder with .git 
 		static string INIFolder; //path INI file		
 								 //enum Plugin_Folder_Structure {Singl=0,Strucure_1=1}; //List possible plugins folder structure
 								 //Plugin_Folder_Strucure plstr=Plugin_Folder_Structure.Strucure_1;  //using plugins folder structure
 								 //Ini file fields
-		static string Compilator = "spcomp.exe";
+		static string Compilator = "spcomp.exe";// Compiler for Sourcemod plugin
 		static string Compilator_Folder;
 		static string Compilator_Params = "";//"vasym=\"1\" -O2";
 		static string Compilator_Include_Folders = "smk64t\\scripting\\include";
@@ -66,16 +66,7 @@ namespace SourceModPawnCompilerPluginHelper
 			//Console.ForegroundColor = ConsoleColor.DarkBlue;	
 			Console.ForegroundColor =FGcolorH1;
 			Console.Write(title);
-			Console.ForegroundColor =ConsoleColor.White ;
-			Console.Write(" "); Console.WriteLine(args[0]);			
-			Console_ResetColor();
-			mySMcomp_Folder = AppDomain.CurrentDomain.BaseDirectory;
-			// or			
-			//Application.ExecutablePath;
-			//Assembly.GetExecutingAssembly().Location;
-			//Application.StartupPath;
-			Debug.Print("mySMcomp_Folder=" + mySMcomp_Folder);
-			Debug.Print("Args count=" + args.Length);
+			Console.ForegroundColor =ConsoleColor.White ;			
 			//
 			//Parsing argumets
 			//
@@ -85,6 +76,15 @@ namespace SourceModPawnCompilerPluginHelper
 				ScriptFinish(true);
 				System.Environment.Exit(0);
 			}
+			Console.Write(" "); Console.WriteLine(args[0]);
+			Console_ResetColor();
+			mySMcomp_Folder = AppDomain.CurrentDomain.BaseDirectory;
+			// or			
+			//Application.ExecutablePath;
+			//Assembly.GetExecutingAssembly().Location;
+			//Application.StartupPath;
+			Debug.Print("mySMcomp_Folder=" + mySMcomp_Folder);
+			Debug.Print("Args count=" + args.Length);
 			Console.Title = title + " " + args[0] + " " + DateTime.Now.ToString();
 			SourceFile = args[0];			
 			//EXT1
@@ -259,7 +259,7 @@ namespace SourceModPawnCompilerPluginHelper
 			if (err.Length != 0) Console.WriteLine(err);
 			compiler.WaitForExit();
 			//Delete datetime.inc
-			if (!File.Exists(SourceFolder + "datetimecomp.inc")) File.Delete(SourceFolder + "datetimecomp.inc");
+			if (File.Exists(SourceFolder + "datetimecomp.inc")) File.Delete(SourceFolder + "datetimecomp.inc");
 			//ERRORLEVEL
 			ConsoleColor ERRORLEVEL_color;
 			if (compiler.ExitCode > 0) ERRORLEVEL_color = ConsoleColor.Red;
