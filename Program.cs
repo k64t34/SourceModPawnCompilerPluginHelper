@@ -14,12 +14,46 @@ using System.Net;
 using System.Threading;
 using System.Reflection;
 using System.Timers;
+using System.Windows;
+using System.Runtime.InteropServices;
+using Microsoft.Win32;
+using System.Windows.Forms;
+using System.Drawing;
 
 
 namespace SourceModPawnCompilerPluginHelper
 {
 	class Program
 	{
+		#region Windows size & position //https://www.cyberforum.ru/csharp-beginners/thread300550.html
+		public struct RECT
+		{
+			public int Left;
+			public int Top;
+			public int Right;
+			public int Bottom;
+		}
+		static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);//https://studassistent.ru/charp/centralnoe-polozhenie-okna-konsoli-c
+		static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+		static readonly IntPtr HWND_TOP = new IntPtr(0);
+		const UInt32 SWP_NOSIZE = 0x0001;
+		const UInt32 SWP_NOMOVE = 0x0002;
+		const UInt32 SWP_NOZORDER = 0x0004;
+		const UInt32 SWP_NOREDRAW = 0x0008;
+		const UInt32 SWP_NOACTIVATE = 0x0010;
+		const UInt32 SWP_FRAMECHANGED = 0x0020;
+		const UInt32 SWP_SHOWWINDOW = 0x0040;
+		const UInt32 SWP_HIDEWINDOW = 0x0080;
+		const UInt32 SWP_NOCOPYBITS = 0x0100;
+		const UInt32 SWP_NOOWNERZORDER = 0x0200;
+		const UInt32 SWP_NOSENDCHANGING = 0x0400;
+
+		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+		[DllImport("user32.dll")]// https://studassistent.ru/charp/centralnoe-polozhenie-okna-konsoli-c
+		[return: MarshalAs(UnmanagedType.Bool)]
+		static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);		
+		#endregion
 		//Global 
 		static string mySMcomp_Folder; //Gets the directory where the SMcompiler.exe  is stored.	
 		static string SourceFile; //Source plugin file .sp
@@ -79,6 +113,7 @@ namespace SourceModPawnCompilerPluginHelper
 			Console.Write(" "); Console.WriteLine(args[0]);
 			Console_ResetColor();
 			mySMcomp_Folder = AppDomain.CurrentDomain.BaseDirectory;
+
 			// or			
 			//Application.ExecutablePath;
 			//Assembly.GetExecutingAssembly().Location;
@@ -114,8 +149,9 @@ namespace SourceModPawnCompilerPluginHelper
 			//Поиск INI вверх по 3-ум способам:
 			// 1 просто прыгнуть вверх на пару папок
 			// 2 искать папку содежащую .git или addon			
-			INIFolder  =  System.IO.Directory.GetParent(SourceFolder).ToString();			
-			if (String.Compare(Path.GetDirectoryName(INIFolder), "SCRIPTING", true) == 0)
+			INIFolder  =  System.IO.Directory.GetParent(SourceFolder).ToString();
+			
+			if (String.Compare(Path.GetFileName(INIFolder), "SCRIPTING", true) == 0)
 			{
 				INIFolder = System.IO.Directory.GetParent(INIFolder).ToString();
 				INIFolder = System.IO.Directory.GetParent(INIFolder).ToString();
@@ -146,6 +182,8 @@ namespace SourceModPawnCompilerPluginHelper
 			GetConfigFile(INIFile);
 			//Parsing include from INI file
 			string[] Compilator_Include_Folder = Compilator_Include_Folders.Split(';');
+			Array.Resize(ref Compilator_Include_Folder, Compilator_Include_Folder.Length + 1);
+			Compilator_Include_Folder[Compilator_Include_Folder.Length - 1] = FolderDifference(SourceFolder, PluginFolder);			
 			Compilator_Include_Folders = "";
 			ConsoleWriteField("Include","",false);
 			bool first = true;
@@ -208,7 +246,7 @@ namespace SourceModPawnCompilerPluginHelper
 			compiler.StartInfo.RedirectStandardError = true;
 			compiler.StartInfo.CreateNoWindow = true;
 			compiler.StartInfo.WorkingDirectory = PluginFolder;
-			compiler.StartInfo.WorkingDirectory = SourceFolder;
+			//compiler.StartInfo.WorkingDirectory = SourceFolder;
 			
 			compiler.StartInfo.FileName = Compilator_Folder + Compilator;
 			Console.WriteLine(compiler.StartInfo.FileName);
@@ -243,8 +281,25 @@ namespace SourceModPawnCompilerPluginHelper
 			compiler.StartInfo.UseShellExecute = false;
 			compiler.StartInfo.RedirectStandardOutput = true;			
 			ConsoleWriteField("WorkingDirectory", compiler.StartInfo.WorkingDirectory);
+            #region Set console windows size
+            IntPtr ConsoleHandle = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+			const UInt32 WINDOW_FLAGS = SWP_SHOWWINDOW;
+			var wndRect = new RECT();
+			GetWindowRect(ConsoleHandle, out wndRect); // Получили  размеры текущего она консоли
+			var cWidth = wndRect.Right - wndRect.Left;
+			var cHeight = wndRect.Bottom - wndRect.Top;
+			//Rectangle waRectangle;			
+
+			//int ScreenHeight = SystemInformation.PrimaryMonitorSize.Height;
+			int ScreenHeight = SystemInformation.WorkingArea.Height;
+
+			SetWindowPos(ConsoleHandle, HWND_NOTOPMOST, 0, 0, cWidth, cHeight, WINDOW_FLAGS);
+			SetWindowPos(ConsoleHandle, HWND_NOTOPMOST, 0, 0, cWidth, ScreenHeight, WINDOW_FLAGS);
+			#endregion
+
+
 			try
-			{
+            {
 				compiler.Start();
 			}
 			catch (Exception e)
@@ -565,3 +620,35 @@ namespace SourceModPawnCompilerPluginHelper
 		
 	}
 }
+//Usage: spcomp<filename>[filename...][options]
+
+//Options:
+//-a       output assembler code
+//         -Dpath   active directory path
+//         -e<name> set name of error file (quiet compile)
+//         -H < hwnd > window handle to send a notification message on finish
+//         -h       show included file paths
+//         -i<name> path for include files
+//         -l       create list file (preprocess only)
+//         -o < name > set base name of(P-code) output file
+//         -O<num>  optimization level (default=-O2)
+//             0    no optimization
+//             2    full optimizations
+//         -p<name> set name of "prefix" file
+//         -t<num>  TAB indent size (in character positions, default=8)
+//         -v < num > verbosity level; 0 = quiet, 1 = normal, 2 = verbose(default = 1)
+//			   - w < num > disable a specific warning by its number
+//         -z<num>  compression level, default=9 (0=none, 1=worst, 9=best)
+//         -E       treat warnings as errors
+//         -\       use '\' for escape characters
+//         -^       use '^' for escape characters
+//         -;< +/->require a semicolon to end each statement (default=-)
+//         sym = val  define constant "sym" with value "val"
+//         sym=     define constant "sym" with value 0
+
+//Options may start with a dash or a slash; the options "-d0" and "/d0" are
+//equivalent.
+
+//Options with a value may optionally separate the value from the option letter
+//with a colon (":"), an equal sign ("="), or a space (" "). That is, the options "-d0", "-d=0",
+//"-d:0", and "-d 0" are all equivalent. "-;" is an exception to this and cannot use a space.

@@ -1,5 +1,6 @@
 *.bak
-/.vs/* 
 /bin/*
 /obj/*
 *.pdb 
+/.vs/*
+Thumbs.db
