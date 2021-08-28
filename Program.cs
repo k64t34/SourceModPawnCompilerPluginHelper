@@ -374,7 +374,13 @@ namespace SourceModPawnCompilerPluginHelper
 			Console.Write(" to ");
 			Console.ForegroundColor = FGcolorFieldValue;
 			Console.WriteLine(PluginFolder + "game");
-			
+
+			NetworkCredential theNetworkCredential = new NetworkCredential("dod","12345678");
+			CredentialCache theNetcache = new CredentialCache();
+			theNetcache.Add(@"\\192.168.56.102", 445, "Basic", theNetworkCredential);
+			//then do whatever, such as getting a list of folders:
+			//string[] theFolders = System.IO.Directory.GetDirectories("@\\192.168.56.102\tmp");
+
 			if (!Directory.Exists(SRCDS_Folder))
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
