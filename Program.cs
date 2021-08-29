@@ -1,7 +1,7 @@
 ﻿
-// TODO:Добавить rcon консоль
-// TODO:дублировние  консоли ссервера
-// TODO:не копировать на сервер папку scripting
+// TODO: Добавить rcon консоль
+// TODO: дублировние  консоли ссервера
+// TODO: не копировать на сервер папку scripting
 // TODO: не копировать на сервер типы файлов err, bak
 // TODO: NET USE <\\server> /USER:<username>
 
@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using System.Windows.Forms;
 using System.Drawing;
-
+using System.Security.AccessControl;
 
 namespace SourceModPawnCompilerPluginHelper
 {
@@ -76,6 +76,10 @@ namespace SourceModPawnCompilerPluginHelper
 		static int rcon_Port = 27015;
 		static string rcon_password;
 		static string SRCDS_Folder;
+		static string Hostname;
+		static string Share;
+		static string Share_User;
+		static string Share_Password;		
 		static string SMXFolder = "game\\addons\\sourcemod\\plugins\\";
 		static bool MapReload = false;
 		const ConsoleColor BGcolor = ConsoleColor.Black;
@@ -200,9 +204,7 @@ namespace SourceModPawnCompilerPluginHelper
 					first = false;
 				}
 			}
-			//
-			//Create include file datetime.inc
-			//	
+			#region Create include file datetime.inc			
 			string curDate = DateTime.Now.ToString("dd.MM.yy HH:mm:ss");
 			System.IO.StreamWriter f_inc = new System.IO.StreamWriter(SourceFolder + "datetimecomp.inc", false);
 			f_inc.WriteLine("#if defined DEBUG");
@@ -219,9 +221,10 @@ namespace SourceModPawnCompilerPluginHelper
 			f_inc.WriteLine("\t#define PLUGIN_AUTHOR \"" + Plugin_Author + "\"");
 			f_inc.WriteLine("#endif");
 			f_inc.Close();
+            #endregion
 
-			//Delete old err smx files
-			if (!File.Exists(SourceFile + ".err")) File.Delete(SourceFile + ".err");
+            //Delete old err smx files
+            if (!File.Exists(SourceFile + ".err")) File.Delete(SourceFile + ".err");
 
 			//Test compiler file exist
 			if (!File.Exists(Compilator_Folder + Compilator))
@@ -298,10 +301,10 @@ namespace SourceModPawnCompilerPluginHelper
 
 			SetWindowPos(ConsoleHandle, HWND_NOTOPMOST, 0, 0, cWidth, cHeight, WINDOW_FLAGS);
 			SetWindowPos(ConsoleHandle, HWND_NOTOPMOST, 0, 0, cWidth, ScreenHeight, WINDOW_FLAGS);
-			#endregion
+            #endregion
 
-
-			try
+            #region Run Compiler
+            try
             {
 				compiler.Start();
 			}
@@ -359,9 +362,8 @@ namespace SourceModPawnCompilerPluginHelper
 				ScriptFinish(true);
 				System.Environment.Exit(0);
 			}
-			//
-			// Copy to server
-			//
+            #endregion
+			#region  Copy to server
 			Console.ForegroundColor = FGcolorH1;
 			Console.Write("Copy output files ");
 			Console.ForegroundColor = FGcolorFieldValue;
@@ -369,18 +371,51 @@ namespace SourceModPawnCompilerPluginHelper
 			Console.ForegroundColor = FGcolorH1;
 			Console.Write(" from folder ");
 			Console.ForegroundColor = FGcolorFieldValue;
-			Console.Write(SRCDS_Folder);
+			Console.Write(PluginFolder + "game");
 			Console.ForegroundColor = FGcolorH1;
 			Console.Write(" to ");
 			Console.ForegroundColor = FGcolorFieldValue;
-			Console.WriteLine(PluginFolder + "game");
+			Console.WriteLine(SRCDS_Folder);
+			#region NET USE
+			if (!Directory.Exists(SRCDS_Folder))
+			{
+				try
+				{
+					compiler.StartInfo.FileName = Path.Combine(Environment.GetEnvironmentVariable("windir") + @"\system32", "NET.exe");
+					compiler.StartInfo.Arguments = @"VIEW \\" + Hostname;
+					Console.WriteLine(compiler.StartInfo.FileName + " " + compiler.StartInfo.Arguments);
+					compiler.Start();
+					output = compiler.StandardOutput.ReadToEnd();
+					err = compiler.StandardError.ReadToEnd();
+					if (output.Length != 0) Console.WriteLine(output);
+					if (err.Length != 0) Console.WriteLine(err);
+					compiler.WaitForExit();
+					if (compiler.ExitCode == 0)
+					{
+						compiler.StartInfo.Arguments = @"USE \\" + Hostname + @"\" + Share + " /USER:" + Share_User + " " + Share_Password;
+						Console.WriteLine(compiler.StartInfo.FileName + " " + compiler.StartInfo.Arguments);
+						compiler.Start();
+						output = compiler.StandardOutput.ReadToEnd();
+						err = compiler.StandardError.ReadToEnd();
+						if (output.Length != 0) Console.WriteLine(output);
+						if (err.Length != 0) Console.WriteLine(err);
+						compiler.WaitForExit();
+					}
+				}
+				catch (Exception e)
+				{
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.WriteLine(e.Message);
+					Console_ResetColor();
+				}
+				//NetworkCredential theNetworkCredential = new NetworkCredential("dod","12345678");
+				//CredentialCache theNetcache = new CredentialCache();
+				//theNetcache.Add(@"\\192.168.56.102\tmp", 445, "Basic", theNetworkCredential);
+				//then do whatever, such as getting a list of folders:
+				//string[] theFolders = System.IO.Directory.GetDirectories(@"\\192.168.56.102\tmp");
 
-			NetworkCredential theNetworkCredential = new NetworkCredential("dod","12345678");
-			CredentialCache theNetcache = new CredentialCache();
-			theNetcache.Add(@"\\192.168.56.102", 445, "Basic", theNetworkCredential);
-			//then do whatever, such as getting a list of folders:
-			//string[] theFolders = System.IO.Directory.GetDirectories("@\\192.168.56.102\tmp");
-
+			}
+			#endregion
 			if (!Directory.Exists(SRCDS_Folder))
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
@@ -390,9 +425,9 @@ namespace SourceModPawnCompilerPluginHelper
 				System.Environment.Exit(0);
 			}
 			CopyDirectory(PluginFolder + "game", SRCDS_Folder);
-			//
-			// Reload plugin
-			//   
+			#endregion
+
+			#region Reload plugin
 			Console.ForegroundColor = ConsoleColor.White;
 			Console.WriteLine("\nReload plugin {0} on server {1}:{2}\n", SourceFile, rcon_Address, rcon_Port);
 			Console_ResetColor();
@@ -463,7 +498,7 @@ namespace SourceModPawnCompilerPluginHelper
 			}
 			RCon = null;
 			//Thread.Sleep(10000);
-			
+			#endregion 
 			ScriptFinish(true);
 			System.Environment.Exit(0);
 
@@ -506,13 +541,26 @@ namespace SourceModPawnCompilerPluginHelper
 
 			Plugin_Author = inifile.ReadString("Compiler", "Plugin_Author", "");
 			rcon_password = inifile.ReadString("Server", "rcon_password", "");
-			SRCDS_Folder = inifile.ReadString("Server", "SRCDS_Folder", "");
-			CheckFolderString(ref SRCDS_Folder);
+			
+			
 			MapReload = inifile.ReadBool("Server", "MapReload", false);
-			rcon_Address = inifile.ReadString("Server", "rcon_Address", "");
+			
 			Compilator_Include_Folders = inifile.ReadString("Compiler", "Include", Compilator_Include_Folders);
 			rcon_Port = inifile.ReadInteger("Server", "rcon_port", rcon_Port);
 			Compilator_Params = inifile.ReadString("Compiler", "Parameters", "");
+
+			Hostname= inifile.ReadString("Server", "Hostname", "127.0.0.1");
+			Share = inifile.ReadString("Server", "Share", "");
+			Share_User = inifile.ReadString("Server", "Share_User", "");
+			Share_Password = inifile.ReadString("Server", "Share_Password", "");
+
+			SRCDS_Folder = inifile.ReadString("Server", "SRCDS_Folder", "");
+			CheckFolderString(ref SRCDS_Folder);
+			SRCDS_Folder = @"\\" + Hostname + @"\" + Share + @"\" + SRCDS_Folder;
+
+			rcon_Address = inifile.ReadString("Server", "rcon_Address", "");
+
+			if (String.IsNullOrEmpty(rcon_Address)) rcon_Address = Hostname;
 
 
 

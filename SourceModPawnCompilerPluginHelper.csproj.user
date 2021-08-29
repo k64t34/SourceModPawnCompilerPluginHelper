@@ -2,6 +2,6 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Project</StartAction>
-    <StartArguments>"D:\Users\Andrew\Project\Cuckoo_clock.sourcemod\game\addons\sourcemod\scripting\Cuckoo_clock.sp"</StartArguments>
+    <StartArguments>"D:\Users\Andrew\Project\DoD.teamsSwap.sourcemod\game\addons\sourcemod\scripting\DODteamsSwap.sp"</StartArguments>
   </PropertyGroup>
 </Project>
