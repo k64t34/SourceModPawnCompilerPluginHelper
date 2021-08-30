@@ -382,16 +382,16 @@ namespace SourceModPawnCompilerPluginHelper
 				try
 				{
 					compiler.StartInfo.FileName = Path.Combine(Environment.GetEnvironmentVariable("windir") + @"\system32", "NET.exe");
-					compiler.StartInfo.Arguments = @"VIEW \\" + Hostname;
-					Console.WriteLine(compiler.StartInfo.FileName + " " + compiler.StartInfo.Arguments);
-					compiler.Start();
-					output = compiler.StandardOutput.ReadToEnd();
-					err = compiler.StandardError.ReadToEnd();
-					if (output.Length != 0) Console.WriteLine(output);
-					if (err.Length != 0) Console.WriteLine(err);
-					compiler.WaitForExit();
-					if (compiler.ExitCode == 0)
-					{
+					//compiler.StartInfo.Arguments = @"VIEW \\" + Hostname+@"\"+Share;
+					//Console.WriteLine(compiler.StartInfo.FileName + " " + compiler.StartInfo.Arguments);
+					//compiler.Start();
+					//output = compiler.StandardOutput.ReadToEnd();
+					//err = compiler.StandardError.ReadToEnd();
+					//if (output.Length != 0) Console.WriteLine(output);
+					//if (err.Length != 0) Console.WriteLine(err);
+					//compiler.WaitForExit();
+					//if (compiler.ExitCode == 0)
+					//{
 						compiler.StartInfo.Arguments = @"USE \\" + Hostname + @"\" + Share + " /USER:" + Share_User + " " + Share_Password;
 						Console.WriteLine(compiler.StartInfo.FileName + " " + compiler.StartInfo.Arguments);
 						compiler.Start();
@@ -400,7 +400,7 @@ namespace SourceModPawnCompilerPluginHelper
 						if (output.Length != 0) Console.WriteLine(output);
 						if (err.Length != 0) Console.WriteLine(err);
 						compiler.WaitForExit();
-					}
+					//}
 				}
 				catch (Exception e)
 				{
@@ -438,14 +438,24 @@ namespace SourceModPawnCompilerPluginHelper
 			RCon.ServerOutput += new SourceRcon.StringOutput(ConsoleOutput);
 
 			try
-			{
+			{				
+				IPAddress address;
+				if (!IPAddress.TryParse(rcon_Address, out address))
+				{
+					IPHostEntry host = Dns.GetHostEntry(rcon_Address);
+					rcon_Address=host.AddressList[0].ToString();
+					Console.WriteLine("Host {0} have IP address {1}",Hostname,rcon_Address); Console_ResetColor();
+				}
+
+				Console.Write("Connect to {0}:{1}",rcon_Address,rcon_Port);
 				RCon.Connect(new IPEndPoint(IPAddress.Parse(rcon_Address), rcon_Port), rcon_password);
 				for (int i = 0; i != 10; i++)
 				{
 					Thread.Sleep(1000);
 					if (RCon.Connected) break;
+					Console.Write(".");
 				}
-
+				Console.WriteLine(" OK");
 			}
 			catch (Exception e)
 			{
