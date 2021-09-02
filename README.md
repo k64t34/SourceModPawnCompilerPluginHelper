@@ -42,6 +42,7 @@ RU: Source Mod Pawn Compiler Plugin Helper (далее Помощник) вып�
 * 1.0.5.3  
 - [x] Added autoclose app 
 * 1.0
-- [x] Changed hard datetime format in datetime.inc to prevent locale charset isses  like "Map_Elections" (╨Я╤В, 15.╨░╨┐╤А.2016 16:00:14). 
--  Установлен жесткий формат даты и времени для избежания проблем с кодировкой.
+- [x] Changed hard datetime format in datetime.inc to prevent locale charset isses  like "Map_Elections" (╨Я╤В, 15.╨░╨┐╤А.2016 16:00:14).  
+    Установлен жесткий формат даты и времени для избежания проблем с кодировкой.
 - [x] Added show plugin info after restart plugin in server.
+
