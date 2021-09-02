@@ -1,6 +1,6 @@
 # Source Mod Pawn Compiler Plugin Helper SMcompiler.exe
 ---
-EN: Application is Helper for compiling Sourcemod plugins
+EN: Application is Helper for compiling [Sourcemod](https://www.sourcemod.net) plugins.
 
 Source Mod Pawn Compiler Plugin Helper performs the following functions:
   
@@ -10,10 +10,10 @@ Source Mod Pawn Compiler Plugin Helper performs the following functions:
 
 - Restarts the plugin on the server.
 
-Details in the [wiki](https://github.com/k64t34/SourceModPawnCompilerPluginHelper/wiki)
+Details in the [wiki](https://github.com/k64t34/SourceModPawnCompilerPluginHelper/wiki).
 
 RU: Source Mod Pawn Compiler Plugin Helper (далее Помощник) выполняет слудующие функции: 
-- Запускает компиляцию плагина;
+- Запускает компиляцию плагина [Sourcemod](https://www.sourcemod.net);
 
 - Копирует на сервер скомпилированный файл плагина и прочие файлы плагина (звуки, перевод фраз и т.п.) ;
 
@@ -23,31 +23,25 @@ RU: Source Mod Pawn Compiler Plugin Helper (далее Помощник) вып�
 
 - TODO: Позволяет отправлять команды на сервер
 
-Подробности использования в [Wiki](https://github.com/k64t34/SourceModPawnCompilerPluginHelper/wiki)
+Подробности использования в [Wiki](https://github.com/k64t34/SourceModPawnCompilerPluginHelper/wiki).
 
-##Changelog 
+## Changelog 
 * Unreleased 
- - fix rcon bug
+ - Change structure INI file
+ - Add deleting file  datetime.inc after compiling
+ - Add parameter to INI file to 
+ - Fix rcon bug
+ - Add parameter MapReload. If MapReload=true, then server will sm_map <current_map> after plugin copy to server.
+ - Add parameter ServerReload. If ServerReload=true, then server will _restart after plugin copy to server. 
 * 1.0.5.3  
- -  Autoclose app 
-* 1.0.5.0  
- - Added.двойные кавычки в пути -D.  
+ -  Added autoclose app 
 * 1.0
- - Use hard datetime format in datetime.inc to prevent locale charset isses  like "Map_Elections" (╨Я╤В, 15.╨░╨┐╤А.2016 16:00:14). 
- -Установлен жесткий формат даты и времени для избежания проблем с кодировкой.
-
-Add parameter MapReload. If MapReload=true, then server will _restart after plugin copy to server. 
-
-В ini добавлен параметр MapReload. Если MapReload установить в true, то сервер будет перезагржен после копирования плагина на сервер.  
-
-Add show plugin info after restart plugin in server.
-
-* 0.3 1st Realese
-
+ - Changed hard datetime format in datetime.inc to prevent locale charset isses  like "Map_Elections" (╨Я╤В, 15.╨░╨┐╤А.2016 16:00:14). 
+ - Установлен жесткий формат даты и времени для избежания проблем с кодировкой.
+ - Added show plugin info after restart plugin in server.
 
 ##Plans
 
-- [x] Удалять datetime.inc после компиляции
 - [ ] Добавить в INI пункт сохранять или удалаять .err
 - [ ] Добавить фильтр для исключения файлов для копирования на сервер
 - [ ] Распозонвание простой структуры плагина
@@ -56,17 +50,3 @@ Add show plugin info after restart plugin in server.
 - [ ] Получать лог с сервера для слежения за плагинами 
 - [ ] Добавить консоль сервера
 - [x] При отсутствии действий в окне - закрыть через таймаут
-- 
-
-
- 
-https://help.github.com/articles/basic-writing-and-formatting-syntax/
-http://keepachangelog.com/ru/
-Added для новых функций.
-Changed для изменений в существующей функциональности.
-Deprecated для функциональности, которая будет удалена в следующих версиях.
-Removed для функциональности, которая удалена в этой версии.
-Fixed для любых исправлений.
-Security 
-
-Usage: MySMcompiler <path\file.sp>
