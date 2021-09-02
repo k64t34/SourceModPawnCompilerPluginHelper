@@ -1,10 +1,69 @@
-# Source Mod Pawn Compiler Plugin Helper
+# Source Mod Pawn Compiler Plugin Helper SMcompiler.exe
 ---
-SMcompiler.exe
+RU:  Source Mod Pawn Compiler Plugin Helper ( далее Помощник) выполняет слудующие функции: 
+- Запускает компиляцию плагина;
 
-RU: Помощник для компиляции SourceMod плагинов. 
+- Копирует на сервер скомпилированный файл плагина и прочие файлы плагина (звуки, перевод фраз и т.п.) ;
+
+- Перезапускает плагин на сервере и(или) перезапускает карту и(или) перезапускает сервер.
+
+- TODO: Открывает лог работы сервера, лог ошибок SourceMod
+
+- TODO: Позволяет отправлять команды на сервер
 
 EN: Helper for compiling Sourcemod plugins
+
+---
+
+RU: Требование перед использованием
+SourceMod
+
+1.	Скачать файл дистрибутива SourceMod sourcemod-1.10.0-gitXXXX-windows.zip с https://www.sourcemod.net/downloads.php?branch=stable.
+2.	Распаковать в какую-нибудь папку. Далее для примера используется папка C:\USERS\<UserName>\PROJECT\SOURCEMOD
+
+
+RU: Установка Helper
+1.	Скачать SMcompiler.exe с https://github.com/k64t34/SourceModPawnCompilerPluginHelper/releases.
+2.	Скопировать SMcompiler.exe и smcmphlp.ini в папку C:\USERS\<UserName>\PROJECT\SOURCEMOD\addons\sourcemod\scripting
+3.	Отредактировать в файле smcmphlp.ini пути к папкам SourceMod, библиотекам, SRCDS Source Dedicated Serverи т.п.  https://developer.valvesoftware.com/wiki/Source_Dedicated_Server:ru
+
+
+RU: Исходные данные
+
+1. Папка SourceMod. Далее для примера используется папка C:\USERS\<UserName>\PROJECT\SOURCEMOD
+2. Папка с плагином. Далее для примера используется папка C:\USERS\<UserName>\PROJECT\<Your Plugins> 
+
+В простейшем случае должно быть две папки:
+
+C:\USERS\<UserName>\PROJECT
+                      ├─ SOURCEMOD
+                      └─ <Your Plugins>					  
+
+	
+3. Папки с библиотеками (при необходимости). Далее для примера используется папка с библиотекой SMLIB C:\USERS\<UserName>\PROJECT\smLIB и папка C:\USERS\<UserName>\PROJECT\smK64.
+4. Source Mod Pawn Compiler Plugin Helper ( далее Помощник)
+	Скачать SMcompiler.exe с https://github.com/k64t34/SourceModPawnCompilerPluginHelper/releases.
+	Скопировать SMcompiler.exe и smcmphlp.ini в папку C:\USERS\<UserName>\PROJECT\SOURCEMOD\
+	Отредактировать в файле smcmphlp.ini пути к папкам SourceMod, библиотекам, SRCDS Source Dedicated Serverи т.п.  https://developer.valvesoftware.com/wiki/Source_Dedicated_Server:ru
+	
+	C:\USERS\<UserName>\PROJECT\SOURCEMOD\addons\sourcemod\scripting		
+	
+В простейшем случае должно быть две папки:
+
+C:\USERS\<UserName>\PROJECT
+                      ├─ SOURCEMOD
+                      ├─ <Your Plugins>					  
+                      ├─ smLIB 
+                      └─ smK64T					  
+					  
+В простейшем случае должно быть две папки:
+
+C:\USERS\<UserName>\PROJECT
+                      ├─ SOURCEMOD
+                      ├─ <Your Plugins>					  
+                      ├─ smLIB 
+                      └─ smK64T					  
+					  
 
 0.Перед запуском SMcompiler.exe должена существовать папка SourceMod со всей файловой структурой.
 Оптимально размещать файл SMcompiler.exe и smcmphlp.ini в папке ...\SOURCEMOD\addons\sourcemod\scripting
@@ -12,7 +71,7 @@ EN: Helper for compiling Sourcemod plugins
 
 ```sh
 
-D:\USERS\<UserName>\PROJECT\SOURCEMOD
+C:\USERS\<UserName>\PROJECT\SOURCEMOD
 ├───addons
 │   ├───metamod
 │   └───sourcemod
