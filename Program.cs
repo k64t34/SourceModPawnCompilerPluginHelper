@@ -1,15 +1,4 @@
 ﻿
-// TODO: Добавить rcon консоль
-// TODO: дублировние  консоли ссервера
-// TODO: не копировать на сервер папку scripting
-// TODO: не копировать на сервер типы файлов err, bak
-// TODO: NET USE <\\server> /USER:<username>
-
-//TODO:EXT1 - Изменить проверку файла, если указан не полный путь к файлу а тольк имя
-//TODO:EXT3 - Рекурсивный поиск INI файла вверх и в стороны.
-//TODO:EXT4 - Проверять расширения
-//
-//TODO:->Доступ к файлам сервера по FTP
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -23,6 +12,7 @@ using Microsoft.Win32;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Security.AccessControl;
+using System.Text.RegularExpressions;
 
 namespace SourceModPawnCompilerPluginHelper
 {
@@ -63,25 +53,26 @@ namespace SourceModPawnCompilerPluginHelper
 		static string SourceFolder;//Path to source plugin file .sp
 		static string INIFile = "smcmphlp.ini"; //INI file for source plugin
 		static string PluginFolder; //root plugin folder with .git 
-		static string INIFolder; //path INI file		
-								 //enum Plugin_Folder_Structure {Singl=0,Strucure_1=1}; //List possible plugins folder structure
-								 //Plugin_Folder_Strucure plstr=Plugin_Folder_Structure.Strucure_1;  //using plugins folder structure
-								 //Ini file fields
-		static string Compilator = "spcomp.exe";// Compiler for Sourcemod plugin
-		static string Compilator_Folder;
-		static string Compilator_Params = "";//"vasym=\"1\" -O2";
-		static string Compilator_Include_Folders = "smk64t\\scripting\\include";
-		static string Plugin_Author;
-		static string rcon_Address = "127.0.0.1";
-		static int rcon_Port = 27015;
-		static string rcon_password;
+		static string INIFolder; //path INI file
+		static string Compilator = "spcomp.exe";// Pawn compiler for Sourcemod plugin
+		static string Compilator_Include_FoldersList="";
+		//INI file params
+		static string ini_Compilator_Folder;
+		static string ini_Compilator_Params = "";//"vasym=\"1\" -O2";
+		static string ini_Compilator_Include_FoldersList = "";// "smk64t\\scripting\\include";
+		static string ini_Plugin_Author;		
+		static string ini_rcon_Address = "127.0.0.1";
+		static int ini_rcon_Port = 27015;
+		static string ini_rcon_password;
 		static string SRCDS_Folder;
-		static string Hostname;
-		static string Share;
-		static string Share_User;
-		static string Share_Password;		
-		static string SMXFolder = "game\\addons\\sourcemod\\plugins\\";
-		static bool MapReload = false;
+		static string ini_Hostname;
+		static string ini_Share;
+		static string ini_Share_User;
+		static string ini_Share_Password;		
+		static bool ini_MapReload = false;
+		static bool ini_ServerReload = false;
+
+		static string SMXFolder = @"game\addons\sourcemod\plugins\";
 		const ConsoleColor BGcolor = ConsoleColor.Black;
 		const ConsoleColor FGcolor = ConsoleColor.White;
 		const ConsoleColor FGcolorH1 = ConsoleColor.Yellow;
@@ -113,23 +104,21 @@ namespace SourceModPawnCompilerPluginHelper
 			//
 			if (args.Length < 1)
 			{
-				Console.WriteLine("Usage: MySMcompiler <path\\file.sp>");
+				Console.WriteLine("Usage: SMcompiler.exe <path\\file.sp>");
 				ScriptFinish(true);
 				System.Environment.Exit(0);
 			}
 			Console.Write(" "); Console.WriteLine(args[0]);
 			Console_ResetColor();
 			mySMcomp_Folder = AppDomain.CurrentDomain.BaseDirectory;
-
-			// or			
-			//Application.ExecutablePath;
-			//Assembly.GetExecutingAssembly().Location;
-			//Application.StartupPath;
-			Debug.Print("mySMcomp_Folder=" + mySMcomp_Folder);
+				// or			
+				//Application.ExecutablePath;
+				//Assembly.GetExecutingAssembly().Location;
+				//Application.StartupPath;
+			ConsoleWriteField("SMcompiler folder", mySMcomp_Folder);			
 			Debug.Print("Args count=" + args.Length);
 			Console.Title = title + " " + args[0] + " " + DateTime.Now.ToString();
 			SourceFile = args[0];			
-			//EXT1
 			if (!File.Exists(SourceFile))
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
@@ -141,8 +130,7 @@ namespace SourceModPawnCompilerPluginHelper
 			SourceFolder = System.IO.Directory.GetParent(SourceFile).ToString() + "\\";
 			CheckFolderString(ref SourceFolder);
 			SourceFile = Path.GetFileNameWithoutExtension(SourceFile);
-			Console.Title = title + SourceFile + ".sp " + DateTime.Now.ToString();
-			//EXT4
+			Console.Title = title + SourceFile + ".sp " + DateTime.Now.ToString();			
 			Console.ForegroundColor = FGcolorFieldName;
 			Console.Write("Source file \t" );
 			Console.BackgroundColor = ConsoleColor.Gray;
@@ -152,10 +140,6 @@ namespace SourceModPawnCompilerPluginHelper
 			Console.ForegroundColor = ConsoleColor.Black;
 			Console.WriteLine(SourceFile + ".sp");
 			Console_ResetColor();
-			//EXT3
-			//Поиск INI вверх по 3-ум способам:
-			// 1 просто прыгнуть вверх на пару папок
-			// 2 искать папку содежащую .git или addon			
 			INIFolder  =  System.IO.Directory.GetParent(SourceFolder).ToString();
 			
 			if (String.Compare(Path.GetFileName(INIFolder), "SCRIPTING", true) == 0)
@@ -187,23 +171,23 @@ namespace SourceModPawnCompilerPluginHelper
 			Console_ResetColor();
 
 			GetConfigFile(INIFile);
-			//Parsing include from INI file
-			string[] Compilator_Include_Folder = Compilator_Include_Folders.Split(';');
-			Array.Resize(ref Compilator_Include_Folder, Compilator_Include_Folder.Length + 1);
-			Compilator_Include_Folder[Compilator_Include_Folder.Length - 1] = FolderDifference(SourceFolder, PluginFolder);			
-			Compilator_Include_Folders = "";
+			#region Parsing include from INI file
+			string[] Compilator_Include_FoldersArray = ini_Compilator_Include_FoldersList.Split(';');
+			Array.Resize(ref Compilator_Include_FoldersArray, Compilator_Include_FoldersArray.Length + 1);
+			Compilator_Include_FoldersArray[Compilator_Include_FoldersArray.Length - 1] = FolderDifference(SourceFolder, PluginFolder);			
 			ConsoleWriteField("Include","",false);
-			bool first = true;
-			foreach (string s in Compilator_Include_Folder)
+			bool firstBlock = true;
+			foreach (string s in Compilator_Include_FoldersArray)
 			{
 				if (!String.IsNullOrEmpty(s))
 				{
-					if (!first) Console.Write("\t\t");
+					if (!firstBlock) Console.Write("\t\t");
 					Console.WriteLine(s);
-					Compilator_Include_Folders += " -i" + s.Trim();
-					first = false;
+					Compilator_Include_FoldersList += " -i" + s.Trim();
+					firstBlock = false;
 				}
 			}
+			#endregion
 			#region Create include file datetime.inc			
 			string curDate = DateTime.Now.ToString("dd.MM.yy HH:mm:ss");
 			System.IO.StreamWriter f_inc = new System.IO.StreamWriter(SourceFolder + "datetimecomp.inc", false);
@@ -218,34 +202,36 @@ namespace SourceModPawnCompilerPluginHelper
 			f_inc.WriteLine("\t#define PLUGIN_NAME \"" + SourceFile + "\"");
 			f_inc.WriteLine("#endif");
 			f_inc.WriteLine("#if !defined PLUGIN_AUTHOR");
-			f_inc.WriteLine("\t#define PLUGIN_AUTHOR \"" + Plugin_Author + "\"");
+			f_inc.WriteLine("\t#define PLUGIN_AUTHOR \"" + ini_Plugin_Author + "\"");
 			f_inc.WriteLine("#endif");
 			f_inc.Close();
             #endregion
-
-            //Delete old err smx files
+            #region Delete old err smx files
             if (!File.Exists(SourceFile + ".err")) File.Delete(SourceFile + ".err");
+			#endregion
 
-			//Test compiler file exist
-			if (!File.Exists(Compilator_Folder + Compilator))
+			#region Test Pawn compiler file spcomp.exe exist
+			if (!File.Exists(ini_Compilator_Folder + Compilator))
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
-				if (Directory.Exists(Compilator_Folder))
-					Console.WriteLine("ERR: File compiler {0} not found in folder {1}", Compilator, Compilator_Folder);
+				if (Directory.Exists(ini_Compilator_Folder))
+					Console.WriteLine("ERR: File spcomp.exe Pawn compiler {0} not found in folder {1}", Compilator, ini_Compilator_Folder);
 				else
-					Console.WriteLine("ERR: Folder {0} with compiler {1} not found.", Compilator_Folder, Compilator);
+					Console.WriteLine("ERR: Folder {0} with file spcomp.exe Pawn compiler {1} not found.", ini_Compilator_Folder, Compilator);
 				Console_ResetColor();
 				
 				ScriptFinish(true);
 				System.Environment.Exit(4);
 			}
-			//Test compiled folder exist, delete old smx files
-			if (Directory.Exists(PluginFolder + SMXFolder))
+            #endregion
+			#region Prepare folder PLUGINS (game\addons\sourcemod\plugins) for compiled files , delete old smx files
+            if (Directory.Exists(PluginFolder + SMXFolder))
 			{ if (File.Exists(PluginFolder + SMXFolder + SourceFile + ".smx")) File.Delete(PluginFolder + SMXFolder + SourceFile + ".smx"); }
 			else
 			{ System.IO.Directory.CreateDirectory(PluginFolder + SMXFolder); }
-			//Compiling
-			Console.ForegroundColor = FGcolorH1;
+            #endregion
+			#region Compiling
+            Console.ForegroundColor = FGcolorH1;
 			Console.Write("Run compiling "); Console.ForegroundColor = FGcolorFieldValue;
 			Process compiler = new Process();
 			compiler.StartInfo.RedirectStandardOutput = true;
@@ -254,7 +240,7 @@ namespace SourceModPawnCompilerPluginHelper
 			compiler.StartInfo.WorkingDirectory = PluginFolder;
 			//compiler.StartInfo.WorkingDirectory = SourceFolder;
 			
-			compiler.StartInfo.FileName = Compilator_Folder + Compilator;
+			compiler.StartInfo.FileName = ini_Compilator_Folder + Compilator;
 			Console.WriteLine(compiler.StartInfo.FileName);
 			compiler.StartInfo.UseShellExecute = false; //https://msdn.microsoft.com/ru-ru/library/system.diagnostics.processstartinfo.workingdirectory(v=vs.110).aspx			
 			string DiffSourceFolder = FolderDifference(SourceFolder, INIFolder);
@@ -275,14 +261,14 @@ namespace SourceModPawnCompilerPluginHelper
 			Console.WriteLine(buffArg);
 			compiler.StartInfo.Arguments += buffArg;
 
-			if (Compilator_Params.Length != 0)
+			if (ini_Compilator_Params.Length != 0)
 			{
-				Console.WriteLine(" {0}", Compilator_Params);
-				compiler.StartInfo.Arguments += " " + Compilator_Params;
+				Console.WriteLine(" {0}", ini_Compilator_Params);
+				compiler.StartInfo.Arguments += " " + ini_Compilator_Params;
 			}
 
-			Console.WriteLine(Compilator_Include_Folders);
-			compiler.StartInfo.Arguments += Compilator_Include_Folders;
+			Console.WriteLine(Compilator_Include_FoldersList);
+			compiler.StartInfo.Arguments += Compilator_Include_FoldersList;
 			//Console.WriteLine(compiler.StartInfo.Arguments);
 			compiler.StartInfo.UseShellExecute = false;
 			compiler.StartInfo.RedirectStandardOutput = true;			
@@ -362,8 +348,12 @@ namespace SourceModPawnCompilerPluginHelper
 				ScriptFinish(true);
 				System.Environment.Exit(0);
 			}
-            #endregion
-			#region  Copy to server
+			#endregion
+			#endregion
+			#region Copy to server
+
+			#region Check Hostname & SRCDS_Folder 			
+			#endregion
 			Console.ForegroundColor = FGcolorH1;
 			Console.Write("Copy output files ");
 			Console.ForegroundColor = FGcolorFieldValue;
@@ -381,18 +371,8 @@ namespace SourceModPawnCompilerPluginHelper
 			{
 				try
 				{
-					compiler.StartInfo.FileName = Path.Combine(Environment.GetEnvironmentVariable("windir") + @"\system32", "NET.exe");
-					//compiler.StartInfo.Arguments = @"VIEW \\" + Hostname+@"\"+Share;
-					//Console.WriteLine(compiler.StartInfo.FileName + " " + compiler.StartInfo.Arguments);
-					//compiler.Start();
-					//output = compiler.StandardOutput.ReadToEnd();
-					//err = compiler.StandardError.ReadToEnd();
-					//if (output.Length != 0) Console.WriteLine(output);
-					//if (err.Length != 0) Console.WriteLine(err);
-					//compiler.WaitForExit();
-					//if (compiler.ExitCode == 0)
-					//{
-						compiler.StartInfo.Arguments = @"USE \\" + Hostname + @"\" + Share + " /USER:" + Share_User + " " + Share_Password;
+					compiler.StartInfo.FileName = Path.Combine(Environment.GetEnvironmentVariable("windir") + @"\system32", "NET.exe");					
+						compiler.StartInfo.Arguments = @"USE \\" + ini_Hostname + @"\" + ini_Share + " /USER:" + ini_Share_User + " " + ini_Share_Password;
 						Console.WriteLine(compiler.StartInfo.FileName + " " + compiler.StartInfo.Arguments);
 						compiler.Start();
 						output = compiler.StandardOutput.ReadToEnd();
@@ -429,7 +409,7 @@ namespace SourceModPawnCompilerPluginHelper
 
 			#region Reload plugin
 			Console.ForegroundColor = ConsoleColor.White;
-			Console.WriteLine("\nReload plugin {0} on server {1}:{2}\n", SourceFile, rcon_Address, rcon_Port);
+			Console.WriteLine("\nReload plugin {0} on server {1}:{2}\n", SourceFile, ini_rcon_Address, ini_rcon_Port);
 			Console_ResetColor();
 
 			//make you class https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
@@ -440,15 +420,15 @@ namespace SourceModPawnCompilerPluginHelper
 			try
 			{				
 				IPAddress address;
-				if (!IPAddress.TryParse(rcon_Address, out address))
+				if (!IPAddress.TryParse(ini_rcon_Address, out address))
 				{
-					IPHostEntry host = Dns.GetHostEntry(rcon_Address);
-					rcon_Address=host.AddressList[0].ToString();
-					Console.WriteLine("Host {0} have IP address {1}",Hostname,rcon_Address); Console_ResetColor();
+					IPHostEntry host = Dns.GetHostEntry(ini_rcon_Address);
+					ini_rcon_Address = host.AddressList[0].ToString();
+					Console.WriteLine("Host {0} have IP address {1}", ini_Hostname, ini_rcon_Address); Console_ResetColor();
 				}
 
-				Console.Write("Connect to {0}:{1}",rcon_Address,rcon_Port);
-				RCon.Connect(new IPEndPoint(IPAddress.Parse(rcon_Address), rcon_Port), rcon_password);
+				Console.Write("Connect to {0}:{1}", ini_rcon_Address, ini_rcon_Port);
+				RCon.Connect(new IPEndPoint(IPAddress.Parse(ini_rcon_Address), ini_rcon_Port), ini_rcon_password);
 				for (int i = 0; i != 10; i++)
 				{
 					Thread.Sleep(1000);
@@ -469,7 +449,7 @@ namespace SourceModPawnCompilerPluginHelper
 
 				RCon.ServerCommand("status");
 				Thread.Sleep(100);
-				if (MapReload)
+				if (ini_MapReload)
 				{
 					Console.WriteLine("Restart server");
 					RCon.ServerCommand("_restart");
@@ -543,38 +523,31 @@ namespace SourceModPawnCompilerPluginHelper
 		{
 			//****************************************************				
 			IniParser inifile = new IniParser(ConfigFile);
-			Compilator_Folder = inifile.ReadString("Compiler", "Compilator_Folder", mySMcomp_Folder/*"smk64t\\sourcemod-1.7.3-git5301"*/);
-			CheckFolderString(ref Compilator_Folder, ParentFolder(PluginFolder));
+			ini_Compilator_Folder = inifile.ReadString("Compiler", "Compilator_Folder", mySMcomp_Folder/*"smk64t\\sourcemod-1.7.3-git5301"*/);
+			CheckFolderString(ref ini_Compilator_Folder, ParentFolder(PluginFolder));			
+			ConsoleWriteField("Compilator_Folder", ini_Compilator_Folder);
 
-			//Если Compilator_Folder не содержит в начале строки с:\ или \ или \\, то дополнить путь PluginFolder	Compilator_Folder=INIFolder+Compilator_Folder;
-			ConsoleWriteField("Compilator_Folder", Compilator_Folder);
+			ini_Plugin_Author = inifile.ReadString("Compiler", "Plugin_Author", "");
+			ini_rcon_password = inifile.ReadString("Server", "rcon_password", "");
 
-			Plugin_Author = inifile.ReadString("Compiler", "Plugin_Author", "");
-			rcon_password = inifile.ReadString("Server", "rcon_password", "");
-			
-			
-			MapReload = inifile.ReadBool("Server", "MapReload", false);
-			
-			Compilator_Include_Folders = inifile.ReadString("Compiler", "Include", Compilator_Include_Folders);
-			rcon_Port = inifile.ReadInteger("Server", "rcon_port", rcon_Port);
-			Compilator_Params = inifile.ReadString("Compiler", "Parameters", "");
 
-			Hostname= inifile.ReadString("Server", "Hostname", "127.0.0.1");
-			Share = inifile.ReadString("Server", "Share", "");
-			Share_User = inifile.ReadString("Server", "Share_User", "");
-			Share_Password = inifile.ReadString("Server", "Share_Password", "");
+			ini_MapReload = inifile.ReadBool("Server", "MapReload", false);
+			ini_Compilator_Include_FoldersList = inifile.ReadString("Compiler", "Include", ini_Compilator_Folder);
+			ini_rcon_Port = inifile.ReadInteger("Server", "rcon_port", ini_rcon_Port);
+			ini_Compilator_Params = inifile.ReadString("Compiler", "Parameters", "");
+
+			ini_Hostname = inifile.ReadString("Server", "Hostname", "");
+			ini_Share = inifile.ReadString("Server", "Share", "");
+			ini_Share_User = inifile.ReadString("Server", "Share_User", "");
+			ini_Share_Password = inifile.ReadString("Server", "Share_Password", "");
 
 			SRCDS_Folder = inifile.ReadString("Server", "SRCDS_Folder", "");
 			CheckFolderString(ref SRCDS_Folder);
-			SRCDS_Folder = @"\\" + Hostname + @"\" + Share + @"\" + SRCDS_Folder;
+			SRCDS_Folder = @"\\" + ini_Hostname + @"\" + ini_Share + @"\" + SRCDS_Folder;
 
-			rcon_Address = inifile.ReadString("Server", "rcon_Address", "");
+			ini_rcon_Address = inifile.ReadString("Server", "rcon_Address", "");
 
-			if (String.IsNullOrEmpty(rcon_Address)) rcon_Address = Hostname;
-
-
-
-
+			if (String.IsNullOrEmpty(ini_rcon_Address)) ini_rcon_Address = ini_Hostname;
 			/*if (!String.IsNullOrEmpty(ConfigFile)) {			
 				//http://msdn.microsoft.com/en-us/library/system.string.isnullorempty.aspx
 				Console.WriteLine("INF: Use ini file " + ConfigFile);
@@ -593,16 +566,16 @@ namespace SourceModPawnCompilerPluginHelper
 			}*/
 
 #if DEBUG
-			Debug.Print("MapReload\t\t=" + MapReload);
+			Debug.Print("MapReload\t\t=" + ini_MapReload);
 			Debug.Print("Compilator\t\t=" + Compilator);
-			Debug.Print("Compilator_Folder\t=" + Compilator_Folder);
-			Debug.Print("Compilator_Params\t=" + Compilator_Params);
-			Debug.Print("Compilator_Include_Folders=" + Compilator_Include_Folders);
+			Debug.Print("Compilator_Folder\t=" + ini_Compilator_Folder);
+			Debug.Print("Compilator_Params\t=" + ini_Compilator_Params);
+			Debug.Print("Compilator_Include_FoldersList=" + ini_Compilator_Include_FoldersList);
 			Debug.Print("SRCDS_Folder=" + SRCDS_Folder);
 			ConsoleWriteField("SRCDS_Folder", SRCDS_Folder);
-			Debug.Print("rcon_address=" + rcon_Address);
-			Debug.Print("rcon_port=" + rcon_Port);
-			Debug.Print("rcon_password=" + rcon_password);
+			Debug.Print("rcon_address=" + ini_rcon_Address);
+			Debug.Print("rcon_port=" + ini_rcon_Port);
+			Debug.Print("rcon_password=" + ini_rcon_password);
 #endif
 		}
 		//*******************************************

@@ -6,7 +6,7 @@ Source Mod Pawn Compiler Plugin Helper performs the following functions:
   
 - Starts the compilation of the plugin;
 
-- Copies to the server the compiled plugin file and other plugin files (sounds, translation of phrases, etc.);
+- Copies to the Source Dedicated Serverserver the compiled plugin file and other plugin files (sounds, translation of phrases, etc.);
 
 - Restarts the plugin on the server.
 
@@ -32,13 +32,17 @@ Details in the [wiki](https://github.com/k64t34/SourceModPawnCompilerPluginHelpe
 - [ ] Add parameter to INI file to 
 - [ ] Add a parameter to the INI file to determine whether to save or delete the ERR file
 - [ ] Fix rcon bug
-- [ ] Добавить фильтр для исключения файлов для копирования на сервер
+- [ ] Add Проверять тип файла SP. Если не SP не запускать компилято
+- [ ] Add Добавить фильтр для исключения файлов для копирования на сервер.Не копировать на сервер папку scripting. Не копировать на сервер типы файлов err, bak.
 - [ ] Add parameter MapReload. If MapReload=true, then server will sm_map <current_map> after plugin copy to server.
 - [ ] Add parameter ServerReload. If ServerReload=true, then server will _restart after plugin copy to server. 
 - [ ] Add отображать как абсольные так и относительные пути
 - [ ] Fix распознование абсолютных и относительных путей 
 - [ ] Add Получать лог с сервера для слежения за плагинами 
-- [ ] Add Добавить консоль сервера
+- [ ] Add Добавить дублирование консоли сервера
+- [ ] Add Изменить проверку файла, если указан не полный путь к файлу а тольк имя или относительный путь
+- [ ] Fix Если Compilator_Folder не содержит в начале строки с:\ или \ или \\, то дополнить путь PluginFolder	Compilator_Folder=INIFolder+Compilator_Folder;
+- [ ] Fix Check Parameters for copy plugin files to Source Dedicated Server over SMB share or local: hostname, SRCDS_Folder,Share,Share_User,Share_Password
 * 1.0.5.3  
 - [x] Added autoclose app 
 * 1.0
