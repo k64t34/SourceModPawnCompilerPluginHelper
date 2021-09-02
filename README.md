@@ -1,6 +1,6 @@
 # Source Mod Pawn Compiler Plugin Helper SMcompiler.exe
 ---
-EN: Application is Helper for compiling [Sourcemod](https://www.sourcemod.net) plugins.
+```EN```: Application is Helper for compiling [Sourcemod](https://www.sourcemod.net) plugins.
 
 Source Mod Pawn Compiler Plugin Helper performs the following functions:
   
@@ -12,7 +12,7 @@ Source Mod Pawn Compiler Plugin Helper performs the following functions:
 
 Details in the [wiki](https://github.com/k64t34/SourceModPawnCompilerPluginHelper/wiki).
 
-RU: Source Mod Pawn Compiler Plugin Helper (далее Помощник) выполняет слудующие функции: 
+```RU```: Source Mod Pawn Compiler Plugin Helper (далее Помощник) выполняет слудующие функции: 
 - Запускает компиляцию плагина [Sourcemod](https://www.sourcemod.net);
 
 - Копирует на сервер скомпилированный файл плагина и прочие файлы плагина (звуки, перевод фраз и т.п.) ;
