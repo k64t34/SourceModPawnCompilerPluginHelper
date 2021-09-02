@@ -27,26 +27,21 @@ RU: Source Mod Pawn Compiler Plugin Helper (далее Помощник) вып�
 
 ## Changelog 
 * Unreleased 
- - Change structure INI file
- - Add deleting file  datetime.inc after compiling
- - Add parameter to INI file to 
- - Fix rcon bug
- - Add parameter MapReload. If MapReload=true, then server will sm_map <current_map> after plugin copy to server.
- - Add parameter ServerReload. If ServerReload=true, then server will _restart after plugin copy to server. 
-* 1.0.5.3  
- -  Added autoclose app 
-* 1.0
- - Changed hard datetime format in datetime.inc to prevent locale charset isses  like "Map_Elections" (╨Я╤В, 15.╨░╨┐╤А.2016 16:00:14). 
- - Установлен жесткий формат даты и времени для избежания проблем с кодировкой.
- - Added show plugin info after restart plugin in server.
-
-##Plans
-
-- [ ] Добавить в INI пункт сохранять или удалаять .err
+- [ ] Change structure INI file
+- [ ] Add deleting file  datetime.inc after compiling
+- [ ] Add parameter to INI file to 
+- [ ] Add a parameter to the INI file to determine whether to save or delete the ERR file
+- [ ] Fix rcon bug
 - [ ] Добавить фильтр для исключения файлов для копирования на сервер
-- [ ] Распозонвание простой структуры плагина
-- [ ] need test  Наладить распознование абсолютных и относительных путей 
-- [ ] Отображать как абсольные так и относительные пути
-- [ ] Получать лог с сервера для слежения за плагинами 
-- [ ] Добавить консоль сервера
-- [x] При отсутствии действий в окне - закрыть через таймаут
+- [ ] Add parameter MapReload. If MapReload=true, then server will sm_map <current_map> after plugin copy to server.
+- [ ] Add parameter ServerReload. If ServerReload=true, then server will _restart after plugin copy to server. 
+- [ ] Add отображать как абсольные так и относительные пути
+- [ ] Fix распознование абсолютных и относительных путей 
+- [ ] Add Получать лог с сервера для слежения за плагинами 
+- [ ] Add Добавить консоль сервера
+* 1.0.5.3  
+- [x] Added autoclose app 
+* 1.0
+- [x] Changed hard datetime format in datetime.inc to prevent locale charset isses  like "Map_Elections" (╨Я╤В, 15.╨░╨┐╤А.2016 16:00:14). 
+-  Установлен жесткий формат даты и времени для избежания проблем с кодировкой.
+- [x] Added show plugin info after restart plugin in server.
