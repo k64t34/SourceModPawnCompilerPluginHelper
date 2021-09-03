@@ -7,10 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceModPawnCompilerPlugin
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug S10|Any CPU = Debug S10|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BE05755C-F4FF-421D-BB7C-2A8A4A173E3D}.Debug S10|Any CPU.ActiveCfg = Debug S10|Any CPU
+		{BE05755C-F4FF-421D-BB7C-2A8A4A173E3D}.Debug S10|Any CPU.Build.0 = Debug S10|Any CPU
 		{BE05755C-F4FF-421D-BB7C-2A8A4A173E3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BE05755C-F4FF-421D-BB7C-2A8A4A173E3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE05755C-F4FF-421D-BB7C-2A8A4A173E3D}.Release|Any CPU.ActiveCfg = Release|Any CPU

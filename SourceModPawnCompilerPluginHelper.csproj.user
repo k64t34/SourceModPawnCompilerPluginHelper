@@ -4,4 +4,17 @@
     <StartAction>Project</StartAction>
     <StartArguments>"D:\Users\Andrew\Project\DoD.teamsSwap.sourcemod\game\addons\sourcemod\scripting\DODteamsSwap.sp"</StartArguments>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug S10|AnyCPU'">
+    <StartArguments>"c:\Users\skorik\source\repos\DoD.PlayerArbiter.Sourcemod\game\addons\sourcemod\scripting\DODplayerArbiter.sp"</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PublishUrlHistory>publish\</PublishUrlHistory>
+    <InstallUrlHistory />
+    <SupportUrlHistory />
+    <UpdateUrlHistory />
+    <BootstrapperUrlHistory />
+    <ErrorReportUrlHistory />
+    <FallbackCulture>ru-RU</FallbackCulture>
+    <VerifyUploadedFiles>false</VerifyUploadedFiles>
+  </PropertyGroup>
 </Project>

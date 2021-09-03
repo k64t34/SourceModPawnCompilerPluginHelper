@@ -28,6 +28,7 @@ Details in the [wiki](https://github.com/k64t34/SourceModPawnCompilerPluginHelpe
 ## Changelog 
 * Unreleased 
 - [ ] Change structure INI file
+- [ ] Fix Restart map
 - [ ] Add deleting file  datetime.inc after compiling
 - [ ] Add parameter to INI file to 
 - [ ] Add a parameter to the INI file to determine whether to save or delete the ERR file
