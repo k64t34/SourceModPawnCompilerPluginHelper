@@ -2,7 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Project</StartAction>
-    <StartArguments>"D:\Users\Andrew\Project\DoD.teamsSwap.sourcemod\game\addons\sourcemod\scripting\DODteamsSwap.sp"</StartArguments>
+    <StartArguments>"D:\Users\Andrew\Project\DoD.PlayerArbiter.Sourcemod\game\addons\sourcemod\scripting\DODplayerArbiter.sp "</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug S10|AnyCPU'">
     <StartArguments>"c:\Users\skorik\source\repos\DoD.PlayerArbiter.Sourcemod\game\addons\sourcemod\scripting\DODplayerArbiter.sp"</StartArguments>

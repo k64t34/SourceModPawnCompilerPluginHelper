@@ -526,26 +526,34 @@ namespace SourceModPawnCompilerPluginHelper
 				ini_Compilator_Folder = buffStr;
 				CheckFolderString(ref ini_Compilator_Folder, ParentFolder(PluginFolder));
 			}
-			SetOnlyExistValue(inifile, "Compiler", "Plugin_Author",		ref ini_Plugin_Author);
+			ini_Plugin_Author=inifile.ReadString("Compiler", "Plugin_Author",ini_Plugin_Author);
 			ini_rcon_Address = inifile.ReadString("Server", "rcon_Address", ini_rcon_Address);
-			SetOnlyExistValue(inifile, "Server", "rcon_password",		ref ini_rcon_password);
-			SetOnlyExistValue(inifile, "Compiler", "Parameters",		ref ini_Compilator_Params);
-			SetOnlyExistValue(inifile, "Server", "Hostname",			ref ini_Hostname);
-			SetOnlyExistValue(inifile, "Server", "Share",				ref ini_Share);			
-			SetOnlyExistValue(inifile, "Server", "Share_User",			ref ini_Share_User);			
-			SetOnlyExistValue(inifile, "Server", "Share_Password",		ref ini_Share_Password);
+			ini_rcon_password= inifile.ReadString("Server", "rcon_password", ini_rcon_password);
+			ini_Compilator_Params = inifile.ReadString("Compiler", "Parameters", ini_Compilator_Params);
+			ini_Hostname = inifile.ReadString("Server", "Hostname", ini_Hostname);
+			ini_Share = inifile.ReadString("Server", "Share", ini_Share);
+			ini_Share_User = inifile.ReadString("Server", "Share_User", ini_Share_User);
+			ini_Share_Password = inifile.ReadString("Server", "Share_Password", ini_Share_User);
 			ini_RestartMap = inifile.ReadBool("Server", "RestartMap",		ini_RestartMap);
 			ini_RestartServer = inifile.ReadBool("Server", "RestartServer", ini_RestartServer);
 			ini_rcon_Port = inifile.ReadInteger("Server", "rcon_port",		ini_rcon_Port);
-			SetOnlyExistValue(inifile, "Server", "SRCDS_Folder",			ref ini_SRCDS_Folder);			
+			ini_SRCDS_Folder = inifile.ReadString("Server", "SRCDS_Folder", ini_SRCDS_Folder);			
 			ini_Compilator_Include_FoldersList = inifile.ReadString("Compiler", "Include", "");
-			#if DEBUG
+#if DEBUG
+			Debug.Print("----------------------------------");
+			Debug.Print(" INI parameters from "+ ConfigFile);
+			Debug.Print("----------------------------------");
+			Debug.Print("Plugin_Author\t\t=" + ini_Plugin_Author);
 			Debug.Print("RestartMap\t\t=" + ini_RestartMap);
 			Debug.Print("RestartServer\t\t=" + ini_RestartServer);
 			Debug.Print("Compilator\t\t=" + Compilator);
 			Debug.Print("Compilator_Folder\t=" + ini_Compilator_Folder);
 			Debug.Print("Compilator_Params\t=" + ini_Compilator_Params);
 			Debug.Print("Compilator_Include_FoldersList=" + ini_Compilator_Include_FoldersList);
+			Debug.Print("Hostname\t=" + ini_Hostname);
+			Debug.Print("Share\t=" + ini_Share);
+			Debug.Print("Share_User\t=" + ini_Share_User);
+			Debug.Print("Share_Password\t=" + ini_Share_Password);
 			Debug.Print("SRCDS_Folder=" + ini_SRCDS_Folder);
 			//ConsoleWriteField("SRCDS_Folder", SRCDS_Folder);
 			Debug.Print("rcon_address=" + ini_rcon_Address);
@@ -582,10 +590,7 @@ namespace SourceModPawnCompilerPluginHelper
 #if DEBUG
 			Console.WriteLine("  \"{0}\" \"{1}\"",buff, oldValue);
 #endif
-		}
-
-
-		
+		}			
 		public static void CheckFolderString(ref string s)
 		{
 			//*******************************************
@@ -606,7 +611,6 @@ namespace SourceModPawnCompilerPluginHelper
 				if (!s.StartsWith("\\") & !s.StartsWith("\\\\") & s.Substring(1, 2) != ":\\")
 					s = basepath + s;
 			}
-
 		}
 		public static string FolderDifference(string Minuend, string Subtrahend)
 		{
