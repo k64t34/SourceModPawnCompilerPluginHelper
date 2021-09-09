@@ -89,8 +89,14 @@ namespace SourceModPawnCompilerPluginHelper
 			Console_ResetColor();
 			Console.Clear();			//Console.BackgroundColor = ConsoleColor.Blue;						//Console.ForegroundColor = ConsoleColor.DarkBlue;	
 			Console.ForegroundColor =FGcolorH1;
-			Console.Write(title);
-			Console.ForegroundColor =ConsoleColor.White ;
+			Console.ForegroundColor = ConsoleColor.Cyan;
+			Console.WriteLine("----------------------------------------------------------------");
+			Console.WriteLine(title);
+			Console.WriteLine("----------------------------------------------------------------");
+			Console.ForegroundColor = ConsoleColor.DarkGray;
+			Console.WriteLine(@"Free contact me over GitHub https://github.com/k64t34/SourceModPawnCompilerPluginHelper/issues"+"\n");
+
+			Console.ForegroundColor =ConsoleColor.White;
             #region Parsing argumets
             if (args.Length < 1)
 			{
@@ -98,7 +104,7 @@ namespace SourceModPawnCompilerPluginHelper
 				ScriptFinish(true);
 				System.Environment.Exit(0);
 			}
-			Console.Write(" "); Console.WriteLine(args[0]);
+			//Console.Write(" "); Console.WriteLine(args[0]);
 			Console_ResetColor();            
             mySMcomp_Folder = AppDomain.CurrentDomain.BaseDirectory;ini_Compilator_Folder = mySMcomp_Folder;
 			// or			
@@ -143,6 +149,12 @@ namespace SourceModPawnCompilerPluginHelper
 			ConsoleWriteField("Plugin Folder", PluginFolder);						
 			GetConfigFile(mySMcomp_Folder + INIFile);
 			GetConfigFile(PluginFolder + INIFile);
+
+
+
+
+
+
 			ConsoleWriteField("Compilator_Folder", ini_Compilator_Folder);
 			SRCDS_Folder = ini_SRCDS_Folder;
 			CheckFolderString(ref SRCDS_Folder);
@@ -331,6 +343,7 @@ namespace SourceModPawnCompilerPluginHelper
 			#region Copy to server
 
 			#region Check Hostname & SRCDS_Folder 			
+
 			#endregion
 			Console.ForegroundColor = FGcolorH1;
 			Console.Write("Copy output files ");
@@ -345,11 +358,13 @@ namespace SourceModPawnCompilerPluginHelper
 			Console.ForegroundColor = FGcolorFieldValue;
 			Console.WriteLine(SRCDS_Folder);
 			#region NET USE
-			if (!Directory.Exists(SRCDS_Folder))
+			if (isSMBPath(SRCDS_Folder))
 			{
-				try
+				if (!Directory.Exists(SRCDS_Folder))
 				{
-					compiler.StartInfo.FileName = Path.Combine(Environment.GetEnvironmentVariable("windir") + @"\system32", "NET.exe");					
+					try
+					{
+						compiler.StartInfo.FileName = Path.Combine(Environment.GetEnvironmentVariable("windir") + @"\system32", "NET.exe");
 						compiler.StartInfo.Arguments = @"USE \\" + ini_Hostname + @"\" + ini_Share + " /USER:" + ini_Share_User + " " + ini_Share_Password;
 						Console.WriteLine(compiler.StartInfo.FileName + " " + compiler.StartInfo.Arguments);
 						compiler.Start();
@@ -358,20 +373,20 @@ namespace SourceModPawnCompilerPluginHelper
 						if (output.Length != 0) Console.WriteLine(output);
 						if (err.Length != 0) Console.WriteLine(err);
 						compiler.WaitForExit();
-					//}
+						//}
+					}
+					catch (Exception e)
+					{
+						Console.ForegroundColor = ConsoleColor.Red;
+						Console.WriteLine(e.Message);
+						Console_ResetColor();
+					}
+					//NetworkCredential theNetworkCredential = new NetworkCredential("dod","12345678");
+					//CredentialCache theNetcache = new CredentialCache();
+					//theNetcache.Add(@"\\192.168.56.102\tmp", 445, "Basic", theNetworkCredential);
+					//then do whatever, such as getting a list of folders:
+					//string[] theFolders = System.IO.Directory.GetDirectories(@"\\192.168.56.102\tmp");
 				}
-				catch (Exception e)
-				{
-					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine(e.Message);
-					Console_ResetColor();
-				}
-				//NetworkCredential theNetworkCredential = new NetworkCredential("dod","12345678");
-				//CredentialCache theNetcache = new CredentialCache();
-				//theNetcache.Add(@"\\192.168.56.102\tmp", 445, "Basic", theNetworkCredential);
-				//then do whatever, such as getting a list of folders:
-				//string[] theFolders = System.IO.Directory.GetDirectories(@"\\192.168.56.102\tmp");
-
 			}
 			#endregion
 			if (!Directory.Exists(SRCDS_Folder))
@@ -539,6 +554,14 @@ namespace SourceModPawnCompilerPluginHelper
 			ini_rcon_Port = inifile.ReadInteger("Server", "rcon_port",		ini_rcon_Port);
 			ini_SRCDS_Folder = inifile.ReadString("Server", "SRCDS_Folder", ini_SRCDS_Folder);			
 			ini_Compilator_Include_FoldersList = inifile.ReadString("Compiler", "Include", "");
+			if (!String.IsNullOrEmpty(ini_Hostname))
+			{
+				SRCDS_Folder = @"\" + ini_Share + @"\" + ini_SRCDS_Folder;
+				SRCDS_Folder=SRCDS_Folder.Replace(@"\\", @"\");
+				SRCDS_Folder = @"\\" + ini_Hostname + SRCDS_Folder;
+			}
+			else SRCDS_Folder = ini_SRCDS_Folder;
+
 #if DEBUG
 			Debug.Print("----------------------------------");
 			Debug.Print(" INI parameters from "+ ConfigFile);
@@ -559,23 +582,35 @@ namespace SourceModPawnCompilerPluginHelper
 			Debug.Print("rcon_address=" + ini_rcon_Address);
 			Debug.Print("rcon_port=" + ini_rcon_Port);
 			Debug.Print("rcon_password=" + ini_rcon_password);
-			#endif
+			Debug.Print("SRCDS_Folder=" + SRCDS_Folder);
+			
+#endif
 			#endregion
-			#region Parsing include path from INI file
-			string[] Compilator_Include_FoldersArray = ini_Compilator_Include_FoldersList.Split(';');
+			#region Parsing SRCDS folder
+
+			
+            #endregion
+            #region Parsing include path from INI file
+            string[] Compilator_Include_FoldersArray = ini_Compilator_Include_FoldersList.Split(';');
 			Array.Resize(ref Compilator_Include_FoldersArray, Compilator_Include_FoldersArray.Length + 1);
 			Compilator_Include_FoldersArray[Compilator_Include_FoldersArray.Length - 1] = FolderDifference(SourceFolder, PluginFolder);
-			ConsoleWriteField("Include", "", false);
+			//ConsoleWriteField("Include", "", false);
 			bool firstBlock = true;
+			Console.WriteLine("Compilator_Include_FoldersArray");
+			int i = 1;
 			foreach (string s in Compilator_Include_FoldersArray)
 			{
-				if (!String.IsNullOrEmpty(s))
-				{
+				Console.Write("{0} {1}",i,s);
+				Console.Write(" {0}",makeFullPath(Path.GetPathRoot(ConfigFile), s));
+				if (!String.IsNullOrEmpty(s))				{
+
 					if (!firstBlock) Console.Write("\t\t");
-					Console.WriteLine(s);
+					
 					Compilator_Include_FoldersList += " -i" + s.Trim();
 					firstBlock = false;
 				}
+				Console.WriteLine();
+				i++;
 			}
 			#endregion
 		}
@@ -590,8 +625,56 @@ namespace SourceModPawnCompilerPluginHelper
 #if DEBUG
 			Console.WriteLine("  \"{0}\" \"{1}\"",buff, oldValue);
 #endif
-		}			
-		public static void CheckFolderString(ref string s)
+		}
+		public static bool isSMBPath(string Path) 
+		{
+			bool isSMBPath = false;
+			string SMBpatern = @"^\\{2}(?(?=\S)[^\\]|^$)+(\\(?(?=\S)[^\\]|^$)+)+(\\|\S)$";
+			Match m = Regex.Match(Path, SMBpatern);
+			isSMBPath = (Path.Length == m.Groups[0].Length);			
+			return isSMBPath;
+		}
+		public static bool isLocalPath(string Path)
+		{
+			bool isLocalPath = false;
+			string Localpatern = @"^[A-Za-z]:(\\(?(?=\S)[^\\]|^$)+)+(\\|\S)$";
+			Match m = Regex.Match(Path, Localpatern);
+			isLocalPath = (Path.Length == m.Groups[0].Length);
+			return isLocalPath;
+		}
+		public static string makeFullPath(string basePath, string relativePath)
+		{
+			string FullPath = "";
+			DirectoryInfo f = new DirectoryInfo(basePath+"\\"+relativePath);
+			if (f.Exists) 
+			{
+				FullPath = f.Parent + f.Name;
+			}
+			
+			return FullPath;
+            #region Base path + relative path description            
+			//SMcomp.ini
+			//----------
+			//basefolder=mySMcomp_Folder
+			//include_path 1 (full or relative) - > fullpath 
+			//include_path 2 (full or relative) - > fullpath 
+			//:
+			//include_path n (full or relative) - > fullpath 
+
+			//plugin.ini
+			//----------
+			//basefolder=PluginFolder
+			//include_path 1 (full or relative) - > fullpath 
+			//include_path 2 (full or relative) - > fullpath 
+			//:
+			//include_path n (full or relative) - > fullpath 
+
+			//transform all fullpath to relativepath base on PluginFolder	 
+		  
+            #endregion
+
+        }
+        public static void CheckFolderString(ref string s)
 		{
 			//*******************************************
 			s = s.Trim();
