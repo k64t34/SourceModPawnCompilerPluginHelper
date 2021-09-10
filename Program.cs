@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Security.AccessControl;
 using System.Text.RegularExpressions;
+using System.Collections;
 
 namespace SourceModPawnCompilerPluginHelper
 {
@@ -53,10 +54,12 @@ namespace SourceModPawnCompilerPluginHelper
 		static string SourceFolder;//Path to source plugin file .sp
 		const  string INIFile = "smcmphlp.ini"; //INI file name for source plugins
 		
-		static string INIFileFullPath = ""; //Full path and filename to current INI file
+		//static string INIFileFullPath = ""; //Full path and filename to current INI file
 		static string PluginFolder; //root plugin folder with .git 		
 		const  string Compilator = "spcomp.exe";// Pawn compiler for Sourcemod plugin
 		static string Compilator_Include_FoldersList="";
+		//static string[] Compilator_Include_FoldersArray;
+		static ArrayList Compilator_Include_FoldersArray = new ArrayList();
 		static string SRCDS_Folder; // Full path to srcds folder
 		//INI file params
 		static string ini_Compilator_Folder="";
@@ -84,7 +87,7 @@ namespace SourceModPawnCompilerPluginHelper
 		public static void Console_SetH1Color() { Console.BackgroundColor = BGcolor; Console.ForegroundColor = FGcolorH1; }		
 		public static void Main(string[] args)
 		{			
-			string title = "Sourcemod Compiler Helper ver " + (FileVersionInfo.GetVersionInfo((Assembly.GetExecutingAssembly()).Location)).ProductVersion + ": ";
+			string title = "Sourcemod Compiler Helper ver " + (FileVersionInfo.GetVersionInfo((Assembly.GetExecutingAssembly()).Location)).ProductVersion ;
 			Console.Title = title;
 			Console_ResetColor();
 			Console.Clear();			//Console.BackgroundColor = ConsoleColor.Blue;						//Console.ForegroundColor = ConsoleColor.DarkBlue;	
@@ -113,7 +116,7 @@ namespace SourceModPawnCompilerPluginHelper
 			//Application.StartupPath;
 			ConsoleWriteField("SMcompiler folder", mySMcomp_Folder);			
 			Debug.Print("Args count=" + args.Length);
-			Console.Title = title + " " + args[0] + " " + DateTime.Now.ToString();
+			Console.Title = title + @"   " + args[0] + @"   " + DateTime.Now.ToString();
 			SourceFile = args[0];			
 			if (!File.Exists(SourceFile))
 			{
@@ -124,9 +127,9 @@ namespace SourceModPawnCompilerPluginHelper
 				System.Environment.Exit(1);
 			}
 			SourceFolder = System.IO.Directory.GetParent(SourceFile).ToString() + "\\";
-			CheckFolderString(ref SourceFolder);
+			EndFolderBackslash(ref SourceFolder);
 			SourceFile = Path.GetFileNameWithoutExtension(SourceFile);
-			Console.Title = title + SourceFile + ".sp " + DateTime.Now.ToString();			
+			Console.Title = title + "   "+SourceFile + ".sp    " + DateTime.Now.ToString();			
 			Console.ForegroundColor = FGcolorFieldName;
 			Console.Write("Source file \t" );
 			Console.BackgroundColor = ConsoleColor.Gray;
@@ -144,40 +147,16 @@ namespace SourceModPawnCompilerPluginHelper
 				PluginFolder = System.IO.Directory.GetParent(PluginFolder).ToString();
 				PluginFolder = System.IO.Directory.GetParent(PluginFolder).ToString();
 				PluginFolder = System.IO.Directory.GetParent(PluginFolder).ToString();
-			}			
-			CheckFolderString(ref PluginFolder);
+			}
+			EndFolderBackslash(ref PluginFolder);
 			ConsoleWriteField("Plugin Folder", PluginFolder);						
 			GetConfigFile(mySMcomp_Folder + INIFile);
 			GetConfigFile(PluginFolder + INIFile);
-
-
-
-
-
-
 			ConsoleWriteField("Compilator_Folder", ini_Compilator_Folder);
 			SRCDS_Folder = ini_SRCDS_Folder;
-			CheckFolderString(ref SRCDS_Folder);
+			EndFolderBackslash(ref SRCDS_Folder);
 			SRCDS_Folder = @"\\" + ini_Hostname + @"\" + ini_Share + @"\" + SRCDS_Folder;
-			if (String.IsNullOrEmpty(ini_rcon_Address)) ini_rcon_Address = ini_Hostname;
-
-			#region Parsing include from INI file
-			string[] Compilator_Include_FoldersArray = ini_Compilator_Include_FoldersList.Split(';');
-			Array.Resize(ref Compilator_Include_FoldersArray, Compilator_Include_FoldersArray.Length + 1);
-			Compilator_Include_FoldersArray[Compilator_Include_FoldersArray.Length - 1] = FolderDifference(SourceFolder, PluginFolder);			
-			ConsoleWriteField("Include","",false);
-			bool firstBlock = true;
-			foreach (string s in Compilator_Include_FoldersArray)
-			{
-				if (!String.IsNullOrEmpty(s))
-				{
-					if (!firstBlock) Console.Write("\t\t");
-					Console.WriteLine(s);
-					Compilator_Include_FoldersList += " -i" + s.Trim();
-					firstBlock = false;
-				}
-			}
-			#endregion
+			if (String.IsNullOrEmpty(ini_rcon_Address)) ini_rcon_Address = ini_Hostname;			
 			#region Create include file datetime.inc			
 			string curDate = DateTime.Now.ToString("dd.MM.yy HH:mm:ss");
 			System.IO.StreamWriter f_inc = new System.IO.StreamWriter(SourceFolder + "datetimecomp.inc", false);
@@ -257,7 +236,15 @@ namespace SourceModPawnCompilerPluginHelper
 				compiler.StartInfo.Arguments += " " + ini_Compilator_Params;
 			}
 
-			Console.WriteLine(Compilator_Include_FoldersList);
+			#region Parsing include from INI file
+			//Compilator_Include_FoldersArray[Compilator_Include_FoldersArray.Length - 1] = FolderDifference(SourceFolder, PluginFolder);			
+			foreach (string s in Compilator_Include_FoldersArray)
+			{
+				String p="\""+FolderDifference(s, PluginFolder)+ "\"";
+				Console.WriteLine(" -i "+ p);					
+				Compilator_Include_FoldersList += " -i" + p;
+			}
+			#endregion
 			compiler.StartInfo.Arguments += Compilator_Include_FoldersList;
 			//Console.WriteLine(compiler.StartInfo.Arguments);
 			compiler.StartInfo.UseShellExecute = false;
@@ -539,7 +526,7 @@ namespace SourceModPawnCompilerPluginHelper
 			if (!String.IsNullOrEmpty(buffStr))
 			{
 				ini_Compilator_Folder = buffStr;
-				CheckFolderString(ref ini_Compilator_Folder, ParentFolder(PluginFolder));
+				EndFolderBackslash(ref ini_Compilator_Folder, ParentFolder(PluginFolder));
 			}
 			ini_Plugin_Author=inifile.ReadString("Compiler", "Plugin_Author",ini_Plugin_Author);
 			ini_rcon_Address = inifile.ReadString("Server", "rcon_Address", ini_rcon_Address);
@@ -591,28 +578,45 @@ namespace SourceModPawnCompilerPluginHelper
 			
             #endregion
             #region Parsing include path from INI file
-            string[] Compilator_Include_FoldersArray = ini_Compilator_Include_FoldersList.Split(';');
-			Array.Resize(ref Compilator_Include_FoldersArray, Compilator_Include_FoldersArray.Length + 1);
-			Compilator_Include_FoldersArray[Compilator_Include_FoldersArray.Length - 1] = FolderDifference(SourceFolder, PluginFolder);
+            string[] ini_Compilator_Include_FoldersArray = ini_Compilator_Include_FoldersList.Split(';');
+			//Array.Resize(ref Compilator_Include_FoldersArray, Compilator_Include_FoldersArray.Length + 1);
+			//Compilator_Include_FoldersArray[Compilator_Include_FoldersArray.Length - 1] = FolderDifference(SourceFolder, PluginFolder);
 			//ConsoleWriteField("Include", "", false);
-			bool firstBlock = true;
-			Console.WriteLine("Compilator_Include_FoldersArray");
-			int i = 1;
-			foreach (string s in Compilator_Include_FoldersArray)
+			//bool firstBlock = true;
+			//Console.WriteLine("Compilator_Include_FoldersArray");
+			int i = 1;			
+			string FolderiniFile= ParentFolder(ConfigFile);
+			//Console.WriteLine("FolderiniFile {0}", FolderiniFile);
+			string PathString;
+			foreach (string s in ini_Compilator_Include_FoldersArray)
 			{
-				Console.Write("{0} {1}",i,s);
-				Console.Write(" {0}",makeFullPath(Path.GetPathRoot(ConfigFile), s));
-				if (!String.IsNullOrEmpty(s))				{
-
-					if (!firstBlock) Console.Write("\t\t");
-					
-					Compilator_Include_FoldersList += " -i" + s.Trim();
-					firstBlock = false;
+				PathString = s.Trim();
+				if (!String.IsNullOrEmpty(PathString))
+				{
+					PathString = makeFullPath(FolderiniFile, PathString);
+					if (!String.IsNullOrEmpty(PathString))
+						if (UniqPath(PathString))
+							Compilator_Include_FoldersArray.Add(PathString);
 				}
-				Console.WriteLine();
-				i++;
 			}
-			#endregion
+			#if DEBUG
+			Debug.Print("Compilator_Include_FoldersArray:");
+			foreach (string s in Compilator_Include_FoldersArray) Debug.Print(s);			
+			#endif
+
+			//	Console.WriteLine("{0} \"{1}\"",i, PathString);
+			//	Console.WriteLine("makeFullPath= {0}", makeFullPath(FolderiniFile, PathString));
+			//	if (!String.IsNullOrEmpty(PathString))				{
+
+			//		if (!firstBlock) Console.Write("\t\t");
+
+			//		Compilator_Include_FoldersList += " -i" + PathString;
+			//		firstBlock = false;
+			//	}
+			//	Console.WriteLine();
+			//	i++;
+			//}
+#endregion
 		}
 		public static void SetOnlyExistValue(IniParser inifile, string SectionName, String KeyName, ref String oldValue)
 		{
@@ -645,10 +649,15 @@ namespace SourceModPawnCompilerPluginHelper
 		public static string makeFullPath(string basePath, string relativePath)
 		{
 			string FullPath = "";
-			DirectoryInfo f = new DirectoryInfo(basePath+"\\"+relativePath);
-			if (f.Exists) 
+			if (isLocalPath(relativePath)) FullPath = relativePath;
+			else
 			{
-				FullPath = f.Parent + f.Name;
+				string fp = basePath + relativePath;
+				DirectoryInfo f = new DirectoryInfo(fp);
+				if (f.Exists)
+				{
+					FullPath = f.FullName;
+				}
 			}
 			
 			return FullPath;
@@ -674,13 +683,19 @@ namespace SourceModPawnCompilerPluginHelper
             #endregion
 
         }
-        public static void CheckFolderString(ref string s)
+		public static bool UniqPath(string Path)
+        {
+			bool UniqPath = true;
+			foreach (String p in Compilator_Include_FoldersArray)if (String.Equals(p,Path, StringComparison.OrdinalIgnoreCase)){ UniqPath = false;break; }			
+			return UniqPath;
+		}
+		public static void EndFolderBackslash(ref string s)
 		{
 			//*******************************************
 			s = s.Trim();
 			if (!s.EndsWith("\\")) s += "\\";
 		}
-		public static void CheckFolderString(ref string s, string basepath)
+		public static void EndFolderBackslash(ref string s, string basepath)
 		{
 			s = s.Trim();
 			if (!s.EndsWith("\\")) s += "\\";
