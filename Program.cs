@@ -238,6 +238,7 @@ namespace SourceModPawnCompilerPluginHelper
 
 			#region Parsing include from INI file
 			//Compilator_Include_FoldersArray[Compilator_Include_FoldersArray.Length - 1] = FolderDifference(SourceFolder, PluginFolder);			
+			Compilator_Include_FoldersList = " -i" + SourceFolder;
 			foreach (string s in Compilator_Include_FoldersArray)
 			{
 				String p="\""+FolderDifference(s, PluginFolder)+ "\"";
@@ -479,7 +480,6 @@ namespace SourceModPawnCompilerPluginHelper
 			System.Environment.Exit(0);
 
 		}
-
 
 		static void ErrorOutput(string input) { Console.WriteLine("Error: {0}", input); }
 
