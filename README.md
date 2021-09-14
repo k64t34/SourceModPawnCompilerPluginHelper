@@ -27,7 +27,7 @@ Details in the [wiki](https://github.com/k64t34/SourceModPawnCompilerPluginHelpe
 
 ## Changelog 
 * Unreleased 
-- [ ] Change structure INI file
+
 - [ ] Fix Restart map
 - [ ] Add deleting file  datetime.inc after compiling
 - [ ] Add parameter to INI file to 
@@ -44,6 +44,8 @@ Details in the [wiki](https://github.com/k64t34/SourceModPawnCompilerPluginHelpe
 - [ ] Add Изменить проверку файла, если указан не полный путь к файлу а тольк имя или относительный путь
 - [ ] Fix Если Compilator_Folder не содержит в начале строки с:\ или \ или \\, то дополнить путь PluginFolder	Compilator_Folder=INIFolder+Compilator_Folder;
 - [ ] Fix Check Parameters for copy plugin files to Source Dedicated Server over SMB share or local: hostname, SRCDS_Folder,Share,Share_User,Share_Password
+* 6.2021
+- [x] Change structure INI file 
 * 1.0.5.3  
 - [x] Added autoclose app 
 * 1.0
