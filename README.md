@@ -28,6 +28,7 @@ Details in the [wiki](https://github.com/k64t34/SourceModPawnCompilerPluginHelpe
 ## Changelog 
 * Unreleased 
 
+- [ ] Create release zip file
 - [ ] Fix Restart map
 - [ ] Add deleting file  datetime.inc after compiling
 - [ ] Add parameter to INI file to 
